@@ -1,0 +1,29 @@
+حساب المشرف (Admin):
+البريد: admin@eelu.edu.eg
+كلمة المرور: admin123
+حسابات الأساتذة:
+الأستاذ إيهاب حسني
+البريد: ehosny@eelu.edu.eg
+كلمة المرور: prof123
+الأستاذ محمد كمال
+البريد: mkamal@eelu.edu.eg
+كلمة المرور: prof123
+حسابات الطلاب:
+عمرو
+البريد: amr21-00499@student.eelu.edu.eg
+كلمة المرور: user123
+أحمد
+البريد: ahmed21-00355@student.eelu.edu.eg
+كلمة المرور: user123
+يوسف
+البريد: youssef21-01741@student.eelu.edu.eg
+كلمة المرور: user123
+أشرف
+البريد: ashraf21-00521@student.eelu.edu.eg
+كلمة المرور: user123
+مريم
+البريد: mariam21-02081@student.eelu.edu.eg
+كلمة المرور: user123
+يمنى
+البريد: yomna21-01703@student.eelu.edu.eg
+كلمة المرور: user123

@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - Appointment System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">Student</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.dashboard' }}" href="{{ url_for('student.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.book_appointment' }}" href="{{ url_for('student.book_appointment') }}">
+                            <i class="fas fa-calendar-plus me-2"></i> Book Appointment
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.ai_assistant' }}" href="{{ url_for('student.ai_assistant') }}">
+                            <i class="fas fa-robot me-2"></i> AI Assistant
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.appointments' }}" href="{{ url_for('student.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> My Appointments
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.profile' }}" href="{{ url_for('main.profile') }}">
+                            <i class="fas fa-user-cog me-2"></i> Profile Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Overview Section -->
+            <section id="overview" class="mb-5">
+                <h2 class="h4 mb-4">Welcome, {{ current_user.first_name }}!</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-purple">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Total Appointments</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ upcoming_appointments|length }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-purple">
+                                        <i class="fas fa-calendar-check fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-blue">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Available Professors</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ professors|length }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-blue">
+                                        <i class="fas fa-user-tie fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-green">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Quick Action</h6>
+                                        <a href="{{ url_for('student.book_appointment') }}" class="btn btn-light btn-sm mt-2">Book Now</a>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-green">
+                                        <i class="fas fa-plus-circle fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Upcoming Appointments Section -->
+            <section id="appointments" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h4 mb-0">Upcoming Appointments</h2>
+                    <a href="{{ url_for('student.appointments') }}" class="btn btn-primary btn-sm rounded-pill">
+                        <i class="fas fa-calendar-alt me-2"></i>View All
+                    </a>
+                </div>
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-0">
+                        {% if upcoming_appointments %}
+                        <div class="table-responsive">
+                            <table class="table custom-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Professor</th>
+                                        <th>Date & Time</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in upcoming_appointments %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light rounded-circle text-info me-3">
+                                                    <i class="fas fa-chalkboard-teacher"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ appointment.professor.get_full_name() }}</h6>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <h6 class="mb-0">{{ appointment.start_time.strftime('%B %d, %Y') }}</h6>
+                                                <small class="text-muted">
+                                                    {{ appointment.start_time.strftime('%I:%M %p') }} - 
+                                                    {{ appointment.end_time.strftime('%I:%M %p') }}
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>{{ appointment.subject }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill bg-{{ 
+                                                'warning' if appointment.status == 'pending' else
+                                                'success' if appointment.status == 'confirmed' else
+                                                'danger' if appointment.status == 'cancelled' else
+                                                'info' }}">
+                                                {{ appointment.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <!-- <a href="{{ url_for('student.appointment_detail', appointment_id=appointment.id) }}" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="View Details"> -->
+                                                    <i class="fas fa-eye text-primary"></i>
+                                                </a>
+                                                {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
+                                                <form action="{{ url_for('student.cancel_appointment', appointment_id=appointment.id) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Cancel Appointment">
+                                                        <i class="fas fa-times text-danger"></i>
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <p class="lead mb-3">You don't have any upcoming appointments</p>
+                            <a href="{{ url_for('student.book_appointment') }}" class="btn btn-primary">Book an Appointment</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Available Professors Section -->
+            <section id="professors">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h4 mb-0">Available Professors</h2>
+                </div>
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for professor in professors %}
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-lg">
+                            <div class="card-body text-center p-4">
+                                <div class="avatar bg-light text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user-tie fa-2x"></i>
+                                </div>
+                                <h5 class="card-title mb-1">{{ professor.get_full_name() }}</h5>
+                                <p class="text-muted small mb-3">Professor</p>
+                                <div class="d-grid">
+                                    <a href="{{ url_for('student.book_appointment') }}?professor_id={{ professor.id }}" class="btn btn-primary">
+                                        <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if not professors %}
+                <div class="text-center py-5">
+                    <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                    <p class="lead">No professors are available for appointments at the moment.</p>
+                </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- CSS for custom components -->
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    .gradient-card-purple {
+        background: linear-gradient(135deg, #6f42c1, #6610f2);
+    }
+    
+    .gradient-card-blue {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    .gradient-card-green {
+        background: linear-gradient(135deg, #198754, #20c997);
+    }
+    
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    .text-purple { color: #6f42c1 !important; }
+    .text-blue { color: #0d6efd !important; }
+    .text-green { color: #198754 !important; }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tables */
+    .custom-table {
+        margin: 0;
+    }
+    
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .custom-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Avatars */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    
+    /* Cards */
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Buttons */
+    .btn-light {
+        background: #f8f9fa;
+        border: none;
+        padding: 0.5rem;
+        line-height: 1;
+        border-radius: 8px;
+    }
+    
+    .btn-light:hover {
+        background: #e9ecef;
+    }
+</style>
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/ai-assistant.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ - Appointment System{% endblock %}
+
+{% block content %}
+<div class="hero-section mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4">Frequently Asked Questions</h1>
+                <p class="lead mb-4">Find answers to the most common questions about our appointment scheduling system.</p>
+                <div class="d-flex gap-3">
+                    <a href="#student-faq" class="btn btn-light btn-lg">Student FAQs</a>
+                    <a href="#professor-faq" class="btn btn-outline-light btn-lg">Professor FAQs</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{{ url_for('static', filename='img/eelu-logo.png') }}" alt="EELU Logo" class="img-fluid" style="max-width: 300px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="section-title">How Can We Help?</h2>
+            <p class="lead mb-5">Browse through our comprehensive FAQ to find answers to your questions. If you can't find what you're looking for, please <a href="{{ url_for('main.contact') }}">contact us</a>.</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="list-group sticky-top" style="top: 2rem;">
+                <a href="#general-questions" class="list-group-item list-group-item-action active">General Questions</a>
+                <a href="#student-faq" class="list-group-item list-group-item-action">For Students</a>
+                <a href="#professor-faq" class="list-group-item list-group-item-action">For Professors</a>
+                <a href="#technical-issues" class="list-group-item list-group-item-action">Technical Issues</a>
+                <a href="#privacy-security" class="list-group-item list-group-item-action">Privacy & Security</a>
+                <a href="{{ url_for('main.contact') }}" class="list-group-item list-group-item-action text-primary">Contact Support</a>
+            </div>
+        </div>
+        <div class="col-lg-9">
+            <!-- General Questions Section -->
+            <section id="general-questions" class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h3 class="h4 mb-0">General Questions</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="accordion" id="generalAccordion">
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="general-heading-1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#general-collapse-1" aria-expanded="false">
+                                        What is the Appointment System?
+                                    </button>
+                                </h4>
+                                <div id="general-collapse-1" class="accordion-collapse collapse" aria-labelledby="general-heading-1" data-bs-parent="#generalAccordion">
+                                    <div class="accordion-body">
+                                        <p>The Appointment System is a web-based platform designed to streamline the process of scheduling meetings between students and professors at educational institutions. It provides a user-friendly interface for booking, managing, and tracking appointments.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="general-heading-2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#general-collapse-2" aria-expanded="false">
+                                        How do I create an account?
+                                    </button>
+                                </h4>
+                                <div id="general-collapse-2" class="accordion-collapse collapse" aria-labelledby="general-heading-2" data-bs-parent="#generalAccordion">
+                                    <div class="accordion-body">
+                                        <p>To create an account, click on the "Register" button in the navigation menu. Fill out the registration form with your details, including your name, email, and password. Select your role (student or professor) and submit the form. You'll receive a confirmation email to activate your account.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h4 class="accordion-header" id="general-heading-3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#general-collapse-3" aria-expanded="false">
+                                        Is the system available on mobile devices?
+                                    </button>
+                                </h4>
+                                <div id="general-collapse-3" class="accordion-collapse collapse" aria-labelledby="general-heading-3" data-bs-parent="#generalAccordion">
+                                    <div class="accordion-body">
+                                        <p>Yes, the Appointment System is fully responsive and works on all modern devices, including smartphones and tablets. You can access all features through your mobile browser without needing to install any additional apps.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Student FAQ Section -->
+            <section id="student-faq" class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-success text-white py-3">
+                        <h3 class="h4 mb-0">For Students</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="accordion" id="studentAccordion">
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="student-heading-1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#student-collapse-1" aria-expanded="false">
+                                        How do I book an appointment with a professor?
+                                    </button>
+                                </h4>
+                                <div id="student-collapse-1" class="accordion-collapse collapse" aria-labelledby="student-heading-1" data-bs-parent="#studentAccordion">
+                                    <div class="accordion-body">
+                                        <p>To book an appointment, follow these steps:</p>
+                                        <ol>
+                                            <li>Log in to your student account</li>
+                                            <li>Navigate to the "Book Appointment" section in your dashboard</li>
+                                            <li>Select the professor you want to meet with</li>
+                                            <li>Choose an available date from the calendar</li>
+                                            <li>Select an available time slot</li>
+                                            <li>Enter a subject and description for your meeting</li>
+                                            <li>Click "Book Appointment" to submit your request</li>
+                                        </ol>
+                                        <p>You'll receive a notification once the professor confirms your appointment.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="student-heading-2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#student-collapse-2" aria-expanded="false">
+                                        How can I cancel or reschedule my appointment?
+                                    </button>
+                                </h4>
+                                <div id="student-collapse-2" class="accordion-collapse collapse" aria-labelledby="student-heading-2" data-bs-parent="#studentAccordion">
+                                    <div class="accordion-body">
+                                        <p><strong>To cancel an appointment:</strong></p>
+                                        <ol>
+                                            <li>Go to "My Appointments" in your dashboard</li>
+                                            <li>Find the appointment you want to cancel</li>
+                                            <li>Click the cancel button (X icon)</li>
+                                            <li>Confirm your cancellation</li>
+                                        </ol>
+                                        <p><strong>To reschedule:</strong></p>
+                                        <p>Currently, you need to cancel your existing appointment and book a new one at your preferred time. We're working on a direct rescheduling feature for future updates.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="student-heading-3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#student-collapse-3" aria-expanded="false">
+                                        What if I don't see any available time slots?
+                                    </button>
+                                </h4>
+                                <div id="student-collapse-3" class="accordion-collapse collapse" aria-labelledby="student-heading-3" data-bs-parent="#studentAccordion">
+                                    <div class="accordion-body">
+                                        <p>If you don't see any available time slots, it could be due to one of these reasons:</p>
+                                        <ul>
+                                            <li>The professor hasn't set their availability for the selected date</li>
+                                            <li>All available slots have already been booked by other students</li>
+                                            <li>The professor may be on leave or unavailable on that specific date</li>
+                                        </ul>
+                                        <p>Try selecting a different date or contact the professor directly via email to arrange a meeting outside their regular office hours.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h4 class="accordion-header" id="student-heading-4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#student-collapse-4" aria-expanded="false">
+                                        Will I get a reminder before my appointment?
+                                    </button>
+                                </h4>
+                                <div id="student-collapse-4" class="accordion-collapse collapse" aria-labelledby="student-heading-4" data-bs-parent="#studentAccordion">
+                                    <div class="accordion-body">
+                                        <p>Yes, you'll receive an email reminder 24 hours before your scheduled appointment and another reminder 1 hour before the meeting. Make sure your email address is correctly set in your profile settings to receive these notifications.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Professor FAQ Section -->
+            <section id="professor-faq" class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-info text-white py-3">
+                        <h3 class="h4 mb-0">For Professors</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="accordion" id="professorAccordion">
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="professor-heading-1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#professor-collapse-1" aria-expanded="false">
+                                        How do I set my availability?
+                                    </button>
+                                </h4>
+                                <div id="professor-collapse-1" class="accordion-collapse collapse" aria-labelledby="professor-heading-1" data-bs-parent="#professorAccordion">
+                                    <div class="accordion-body">
+                                        <p>To set your availability:</p>
+                                        <ol>
+                                            <li>Log in to your professor account</li>
+                                            <li>Go to the "Manage Availability" section in your dashboard</li>
+                                            <li>Select the days of the week when you're available</li>
+                                            <li>Set your available time ranges for each day</li>
+                                            <li>Toggle "Recurring Weekly" if this is your regular schedule</li>
+                                            <li>For special dates, you can set one-time availability</li>
+                                            <li>Click "Save Availability" to confirm</li>
+                                        </ol>
+                                        <p>Students will only be able to book appointments during these specified times.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="professor-heading-2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#professor-collapse-2" aria-expanded="false">
+                                        How do I approve or decline appointment requests?
+                                    </button>
+                                </h4>
+                                <div id="professor-collapse-2" class="accordion-collapse collapse" aria-labelledby="professor-heading-2" data-bs-parent="#professorAccordion">
+                                    <div class="accordion-body">
+                                        <p>When a student requests an appointment, you'll receive an email notification. To approve or decline:</p>
+                                        <ol>
+                                            <li>Log in to your professor account</li>
+                                            <li>Go to the "Pending Appointments" section</li>
+                                            <li>Review the appointment details (student name, date, time, subject)</li>
+                                            <li>Click "Approve" to confirm or "Decline" to reject</li>
+                                            <li>Optionally, you can add a note to the student</li>
+                                        </ol>
+                                        <p>The student will be notified of your decision automatically.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h4 class="accordion-header" id="professor-heading-3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#professor-collapse-3" aria-expanded="false">
+                                        Can I export my appointment schedule?
+                                    </button>
+                                </h4>
+                                <div id="professor-collapse-3" class="accordion-collapse collapse" aria-labelledby="professor-heading-3" data-bs-parent="#professorAccordion">
+                                    <div class="accordion-body">
+                                        <p>Yes, you can export your appointment schedule in various formats:</p>
+                                        <ul>
+                                            <li>iCalendar (.ics) - Compatible with most calendar applications like Google Calendar, Outlook, and Apple Calendar</li>
+                                            <li>CSV - For data analysis or import into other systems</li>
+                                            <li>PDF - For printing or sharing</li>
+                                        </ul>
+                                        <p>To export, go to the "My Appointments" section and click the "Export" button in the top right corner. Select your preferred format and date range to download.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Technical Issues Section -->
+            <section id="technical-issues" class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-warning text-dark py-3">
+                        <h3 class="h4 mb-0">Technical Issues</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="accordion" id="technicalAccordion">
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="technical-heading-1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#technical-collapse-1" aria-expanded="false">
+                                        I forgot my password. How do I reset it?
+                                    </button>
+                                </h4>
+                                <div id="technical-collapse-1" class="accordion-collapse collapse" aria-labelledby="technical-heading-1" data-bs-parent="#technicalAccordion">
+                                    <div class="accordion-body">
+                                        <p>To reset your password:</p>
+                                        <ol>
+                                            <li>Click on the "Login" link in the navigation menu</li>
+                                            <li>Click "Forgot Password?" below the login form</li>
+                                            <li>Enter your email address and submit the form</li>
+                                            <li>Check your email for a password reset link (check spam/junk folders if you don't see it)</li>
+                                            <li>Click the link and follow the instructions to create a new password</li>
+                                        </ol>
+                                        <p>If you still can't access your account, please contact our support team at <a href="mailto:support@appointmentsystem.com">support@appointmentsystem.com</a>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="technical-heading-2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#technical-collapse-2" aria-expanded="false">
+                                        Why can't I see my appointments?
+                                    </button>
+                                </h4>
+                                <div id="technical-collapse-2" class="accordion-collapse collapse" aria-labelledby="technical-heading-2" data-bs-parent="#technicalAccordion">
+                                    <div class="accordion-body">
+                                        <p>If you can't see your appointments, try these troubleshooting steps:</p>
+                                        <ol>
+                                            <li>Make sure you're logged in with the correct account</li>
+                                            <li>Check that you're on the "My Appointments" page</li>
+                                            <li>Try clearing your browser cache and cookies</li>
+                                            <li>Ensure your browser is up-to-date</li>
+                                            <li>Check if there are any active filters (upcoming/past) that might be hiding your appointments</li>
+                                        </ol>
+                                        <p>If the issue persists, please contact our technical support team with details about the problem.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h4 class="accordion-header" id="technical-heading-3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#technical-collapse-3" aria-expanded="false">
+                                        Which browsers are supported?
+                                    </button>
+                                </h4>
+                                <div id="technical-collapse-3" class="accordion-collapse collapse" aria-labelledby="technical-heading-3" data-bs-parent="#technicalAccordion">
+                                    <div class="accordion-body">
+                                        <p>Our appointment system supports all modern browsers, including:</p>
+                                        <ul>
+                                            <li>Google Chrome (recommended) - version 60 or later</li>
+                                            <li>Mozilla Firefox - version 60 or later</li>
+                                            <li>Microsoft Edge - version 79 or later</li>
+                                            <li>Safari - version 12 or later</li>
+                                            <li>Opera - version 60 or later</li>
+                                        </ul>
+                                        <p>For the best experience, we recommend keeping your browser updated to the latest version. Internet Explorer is not supported.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Privacy & Security Section -->
+            <section id="privacy-security" class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-danger text-white py-3">
+                        <h3 class="h4 mb-0">Privacy & Security</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="accordion" id="privacyAccordion">
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="privacy-heading-1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#privacy-collapse-1" aria-expanded="false">
+                                        How is my personal information protected?
+                                    </button>
+                                </h4>
+                                <div id="privacy-collapse-1" class="accordion-collapse collapse" aria-labelledby="privacy-heading-1" data-bs-parent="#privacyAccordion">
+                                    <div class="accordion-body">
+                                        <p>We take your privacy seriously. Here's how we protect your personal information:</p>
+                                        <ul>
+                                            <li>All data is encrypted in transit using SSL/TLS protocols</li>
+                                            <li>Passwords are securely hashed and never stored in plain text</li>
+                                            <li>We implement strict access controls to limit who can view your information</li>
+                                            <li>Regular security audits and updates to protect against vulnerabilities</li>
+                                            <li>We never share your personal information with third parties without your consent</li>
+                                        </ul>
+                                        <p>For more details, please review our <a href="#">Privacy Policy</a>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0 mb-3">
+                                <h4 class="accordion-header" id="privacy-heading-2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#privacy-collapse-2" aria-expanded="false">
+                                        Who can see my appointment details?
+                                    </button>
+                                </h4>
+                                <div id="privacy-collapse-2" class="accordion-collapse collapse" aria-labelledby="privacy-heading-2" data-bs-parent="#privacyAccordion">
+                                    <div class="accordion-body">
+                                        <p>Your appointment details are only visible to:</p>
+                                        <ul>
+                                            <li>You (the student or professor involved in the appointment)</li>
+                                            <li>The other participant (the professor if you're a student, or the student if you're a professor)</li>
+                                            <li>System administrators (for technical support purposes only)</li>
+                                        </ul>
+                                        <p>Other students or professors cannot see your appointments or their details. The appointment subject and description are only visible to the participants directly involved in the meeting.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h4 class="accordion-header" id="privacy-heading-3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#privacy-collapse-3" aria-expanded="false">
+                                        How can I enhance my account security?
+                                    </button>
+                                </h4>
+                                <div id="privacy-collapse-3" class="accordion-collapse collapse" aria-labelledby="privacy-heading-3" data-bs-parent="#privacyAccordion">
+                                    <div class="accordion-body">
+                                        <p>To enhance your account security, we recommend these best practices:</p>
+                                        <ol>
+                                            <li>Use a strong, unique password (at least 12 characters with a mix of letters, numbers, and symbols)</li>
+                                            <li>Never share your password with anyone</li>
+                                            <li>Update your password regularly (every 3-6 months)</li>
+                                            <li>Always log out when using shared computers</li>
+                                            <li>Keep your email account secure (as it's used for password recovery)</li>
+                                            <li>Keep your browser and operating system updated</li>
+                                        </ol>
+                                        <p>We're working on implementing two-factor authentication for additional security in a future update.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="text-center mb-5">
+                <p class="lead">Still have questions?</p>
+                <a href="{{ url_for('main.contact') }}" class="btn btn-primary btn-lg">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .list-group-item.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .list-group-item {
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+    }
+    
+    .list-group-item:hover:not(.active) {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+    
+    .accordion-button {
+        background-color: #f8f9fa;
+        box-shadow: none;
+        border-radius: 8px !important;
+        padding: 1rem 1.25rem;
+        font-weight: 500;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        color: var(--primary-color);
+        background-color: rgba(13, 110, 253, 0.1);
+        font-weight: 600;
+    }
+    
+    .accordion-body {
+        padding: 1.25rem;
+        background-color: #fff;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    .card-header {
+        border-top-left-radius: 8px !important;
+        border-top-right-radius: 8px !important;
+    }
+</style>
+{% endblock %} 

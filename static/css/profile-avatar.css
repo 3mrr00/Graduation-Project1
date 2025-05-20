@@ -1,0 +1,115 @@
+/* CSS for Default Avatar */
+.default-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #1a237e;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 0 auto;
+    text-transform: uppercase;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Sizes */
+.avatar-sm {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+}
+
+.avatar-md {
+    width: 100px;
+    height: 100px;
+    font-size: 2.5rem;
+}
+
+.avatar-lg {
+    width: 150px;
+    height: 150px;
+    font-size: 3.5rem;
+}
+
+/* Colors */
+.avatar-primary {
+    background-color: #1a237e;
+}
+
+.avatar-secondary {
+    background-color: #6c757d;
+}
+
+.avatar-success {
+    background-color: #28a745;
+}
+
+.avatar-danger {
+    background-color: #dc3545;
+}
+
+.avatar-warning {
+    background-color: #ffc107;
+    color: #343a40;
+}
+
+.avatar-info {
+    background-color: #17a2b8;
+}
+
+/* Styles */
+.avatar-border {
+    border: 3px solid white;
+}
+
+.avatar-shadow {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Status indicator */
+.avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.status-online {
+    background-color: #28a745;
+}
+
+.status-offline {
+    background-color: #dc3545;
+}
+
+.status-away {
+    background-color: #ffc107;
+}
+
+/* Animation */
+.avatar-pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(26, 35, 126, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(26, 35, 126, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(26, 35, 126, 0);
+    }
+} 

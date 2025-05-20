@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-wrapper">
+                                {% if current_user.profile_picture %}
+                                <img src="{{ url_for('static', filename='profile_pictures/' + current_user.profile_picture) }}" 
+                                     alt="Profile Picture" 
+                                     class="rounded-circle" 
+                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px; background: #f8f9fa;">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">Professor</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.dashboard' }}" href="{{ url_for('professor.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.appointments' }}" href="{{ url_for('professor.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> Appointments
+                            {% if pending_appointments|default([])|length > 0 %}
+                            <span class="badge bg-primary rounded-pill ms-auto">{{ pending_appointments|default([])|length }}</span>
+                            {% endif %}
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.availabilities' }}" href="{{ url_for('professor.availabilities') }}">
+                            <i class="fas fa-clock me-2"></i> Availability
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.ai_assistant' }}" href="{{ url_for('professor.ai_assistant') }}">
+                            <i class="fas fa-robot me-2"></i> AI Assistant
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.profile' }}" href="{{ url_for('main.profile') }}">
+                            <i class="fas fa-user-cog me-2"></i> Profile Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title mb-0">Profile Information</h4>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="fas fa-edit me-2"></i>Edit Profile
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name</label>
+                            <p class="form-control-static">{{ current_user.first_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <p class="form-control-static">{{ current_user.last_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <p class="form-control-static">{{ current_user.email }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Role</label>
+                            <p class="form-control-static">{{ current_user.role|title }}</p>
+                        </div>
+                        {% if current_user.is_professor() %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Faculty ID</label>
+                            <p class="form-control-static">{{ current_user.faculty_id }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Office</label>
+                            <p class="form-control-static">{{ current_user.office }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header gradient-card-blue text-white">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" action="{{ url_for('main.update_profile') }}" enctype="multipart/form-data" id="profileForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <!-- Profile Picture Section -->
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <div class="avatar-upload">
+                                <div class="avatar-preview">
+                                    {% if current_user.profile_picture %}
+                                    <img src="{{ url_for('static', filename='profile_pictures/' + current_user.profile_picture) }}" 
+                                         alt="Profile Picture" 
+                                         class="rounded-circle" 
+                                         style="width: 150px; height: 150px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" 
+                                         style="width: 150px; height: 150px; background: #f8f9fa;">
+                                        <i class="fas fa-user fa-3x text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="avatar-edit">
+                                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="d-none">
+                                    <label for="profile_picture" class="btn btn-primary btn-sm position-absolute bottom-0 end-0 rounded-circle">
+                                        <i class="fas fa-camera"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ current_user.first_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ current_user.last_name }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                    </div>
+                    {% if current_user.is_professor() %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="faculty_id" class="form-label">Faculty ID</label>
+                            <input type="text" class="form-control" id="faculty_id" name="faculty_id" value="{{ current_user.faculty_id }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="office" class="form-label">Office Location</label>
+                            <input type="text" class="form-control" id="office" name="office" value="{{ current_user.office }}" required>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Password Change Section -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Change Password (Optional)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="current_password" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="current_password" name="current_password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password">
+                                <div class="form-text">Password must be at least 8 characters long and include numbers and letters.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer px-0 pb-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    .gradient-card-purple {
+        background: linear-gradient(135deg, #6f42c1, #6610f2);
+    }
+    
+    .gradient-card-blue {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    .gradient-card-green {
+        background: linear-gradient(135deg, #198754, #20c997);
+    }
+    
+    .gradient-card-orange {
+        background: linear-gradient(135deg, #fd7e14, #ffc107);
+    }
+    
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    .text-purple { color: #6f42c1 !important; }
+    .text-blue { color: #0d6efd !important; }
+    .text-green { color: #198754 !important; }
+    .text-orange { color: #fd7e14 !important; }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Form styling */
+    .form-control,
+    .form-select {
+        padding: 0.75rem;
+        border-radius: 8px;
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .btn {
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Profile Picture Upload */
+    .avatar-wrapper {
+        position: relative;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .avatar-upload {
+        position: relative;
+        max-width: 150px;
+        margin: 0 auto;
+    }
+    
+    .avatar-edit {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+    }
+    
+    .avatar-edit input {
+        display: none;
+    }
+    
+    .avatar-edit label {
+        display: inline-block;
+        width: 34px;
+        height: 34px;
+        margin-bottom: 0;
+        border-radius: 50%;
+        background: #0d6efd;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        font-weight: normal;
+        transition: all 0.2s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .avatar-edit label:hover {
+        background: #0b5ed7;
+        transform: scale(1.05);
+    }
+    
+    .avatar-edit label i {
+        color: #fff;
+        font-size: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('profileForm');
+        const newPasswordInput = document.getElementById('new_password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const currentPasswordInput = document.getElementById('current_password');
+        
+        // Password validation
+        if (newPasswordInput && confirmPasswordInput) {
+            confirmPasswordInput.addEventListener('input', function() {
+                if (this.value !== newPasswordInput.value) {
+                    this.setCustomValidity('Passwords do not match');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            // If any password field is filled, all must be filled
+            if (currentPasswordInput.value || newPasswordInput.value || confirmPasswordInput.value) {
+                if (!currentPasswordInput.value) {
+                    e.preventDefault();
+                    alert('Please enter your current password to change it');
+                    return;
+                }
+                if (!newPasswordInput.value) {
+                    e.preventDefault();
+                    alert('Please enter a new password');
+                    return;
+                }
+                if (!confirmPasswordInput.value) {
+                    e.preventDefault();
+                    alert('Please confirm your new password');
+                    return;
+                }
+                if (newPasswordInput.value !== confirmPasswordInput.value) {
+                    e.preventDefault();
+                    alert('New passwords do not match');
+                    return;
+                }
+            }
+        });
+
+        // Profile picture preview
+        const profilePictureInput = document.getElementById('profile_picture');
+        const avatarPreview = document.querySelector('.avatar-preview img');
+        const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+
+        if (profilePictureInput) {
+            profilePictureInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please select an image file');
+                        this.value = '';
+                        return;
+                    }
+                    
+                    // Validate file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size should be less than 5MB');
+                        this.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (avatarPreview) {
+                            avatarPreview.src = e.target.result;
+                        } else {
+                            avatarPlaceholder.innerHTML = `<img src="${e.target.result}" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">`;
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

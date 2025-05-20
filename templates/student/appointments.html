@@ -1,0 +1,678 @@
+{% extends "base.html" %}
+
+{% block title %}My Appointments - Appointment System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">Student</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.dashboard' }}" href="{{ url_for('student.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.book_appointment' }}" href="{{ url_for('student.book_appointment') }}">
+                            <i class="fas fa-calendar-plus me-2"></i> Book Appointment
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.ai_assistant' }}" href="{{ url_for('student.ai_assistant') }}">
+                            <i class="fas fa-robot me-2"></i> AI Assistant
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.appointments' }}" href="{{ url_for('student.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> My Appointments
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.profile' }}" href="{{ url_for('main.profile') }}">
+                            <i class="fas fa-user-cog me-2"></i> Profile Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Header Section -->
+            <section id="header" class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="h4 mb-0">My Appointments</h2>
+                    <a href="{{ url_for('student.book_appointment') }}" class="btn btn-primary rounded-pill">
+                        <i class="fas fa-plus-circle me-2"></i> Book New Appointment
+                    </a>
+                </div>
+            </section>
+
+            <!-- Filter Section -->
+            <section id="filter" class="mb-4">
+                <div class="card border-0 shadow-lg gradient-card-blue">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white mb-0">Filter Appointments</h6>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-light btn-sm active" id="all-btn">All</button>
+                                <button type="button" class="btn btn-light btn-sm" id="upcoming-btn">Upcoming</button>
+                                <button type="button" class="btn btn-light btn-sm" id="past-btn">Past</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Appointments List Section -->
+            <section id="appointments-list">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-0">
+                        {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table custom-table mb-0" id="appointments-table">
+                                <thead>
+                                    <tr>
+                                        <th>Professor</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                    <tr data-date="{{ appointment.start_time.strftime('%Y-%m-%d') }}" class="appointment-row">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light rounded-circle text-info me-3">
+                                                    <i class="fas fa-chalkboard-teacher"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ appointment.professor.get_full_name() }}</h6>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ appointment.start_time.strftime('%b %d, %Y') }}</td>
+                                        <td>{{ appointment.start_time.strftime('%I:%M %p') }}</td>
+                                        <td>{{ appointment.subject }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill bg-{{ 
+                                                'warning' if appointment.status == 'pending' else
+                                                'success' if appointment.status == 'confirmed' else
+                                                'danger' if appointment.status == 'cancelled' else
+                                                'info' }}">
+                                                {{ appointment.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-light view-details-btn" data-appointment-id="{{ appointment.id }}">
+                                                    <i class="fas fa-eye text-primary"></i>
+                                                </a>
+                                                {% if appointment.status in ['pending', 'confirmed'] and appointment.start_time > now %}
+                                                <a href="#" class="btn btn-sm btn-light cancel-btn" data-appointment-id="{{ appointment.id }}">
+                                                    <i class="fas fa-times text-danger"></i>
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <div class="avatar bg-light text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-calendar-times fa-2x"></i>
+                            </div>
+                            <h4 class="mb-3">No Appointments Found</h4>
+                            <p class="lead mb-4">You don't have any appointments scheduled yet</p>
+                            <a href="{{ url_for('student.book_appointment') }}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i> Book an Appointment
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- CSS for custom components -->
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    .gradient-card-blue {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    .gradient-card-purple {
+        background: linear-gradient(135deg, #6f42c1, #6610f2);
+    }
+    
+    .gradient-card-green {
+        background: linear-gradient(135deg, #198754, #20c997);
+    }
+    
+    .gradient-card-red {
+        background: linear-gradient(135deg, #dc3545, #fd7e14);
+    }
+    
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    .text-purple { color: #6f42c1 !important; }
+    .text-blue { color: #0d6efd !important; }
+    .text-green { color: #198754 !important; }
+    
+    /* Avatar */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tables */
+    .custom-table {
+        margin: 0;
+    }
+    
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .custom-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Cards */
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Buttons */
+    .btn-light {
+        background: #f8f9fa;
+        border: none;
+        padding: 0.5rem;
+        line-height: 1;
+        border-radius: 8px;
+    }
+    
+    .btn-light:hover {
+        background: #e9ecef;
+    }
+    
+    .btn-primary {
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Filter buttons */
+    #filter .btn-group .btn {
+        border-radius: 50rem;
+        font-size: 0.85rem;
+        padding: 0.375rem 0.75rem;
+        background: white;
+        border: none;
+        opacity: 0.8;
+        transition: all 0.3s;
+    }
+    
+    #filter .btn-group .btn:hover {
+        opacity: 1;
+    }
+    
+    #filter .btn-group .btn.active {
+        background: white;
+        opacity: 1;
+        font-weight: 600;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const allBtn = document.getElementById('all-btn');
+        const upcomingBtn = document.getElementById('upcoming-btn');
+        const pastBtn = document.getElementById('past-btn');
+        const rows = document.querySelectorAll('.appointment-row');
+        
+        // Helper function to clean up modal backdrops
+        function cleanupModals() {
+            // Remove any stray backdrops
+            document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+                backdrop.remove();
+            });
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+        
+        // Handle modal hidden events
+        document.querySelectorAll('.modal').forEach(function(modal) {
+            modal.addEventListener('hidden.bs.modal', function() {
+                // Ensure backdrop is removed after modal is hidden
+                setTimeout(cleanupModals, 100);
+            });
+        });
+        
+        function filterAppointments(filter) {
+            rows.forEach(row => {
+                const dateStr = row.getAttribute('data-date');
+                const rowDate = new Date(dateStr);
+                rowDate.setHours(0, 0, 0, 0);
+                
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else if (filter === 'upcoming' && rowDate >= today) {
+                    row.style.display = '';
+                } else if (filter === 'past' && rowDate < today) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        if (allBtn && upcomingBtn && pastBtn) {
+            allBtn.addEventListener('click', function() {
+                allBtn.classList.add('active');
+                upcomingBtn.classList.remove('active');
+                pastBtn.classList.remove('active');
+                filterAppointments('all');
+            });
+            
+            upcomingBtn.addEventListener('click', function() {
+                upcomingBtn.classList.add('active');
+                allBtn.classList.remove('active');
+                pastBtn.classList.remove('active');
+                filterAppointments('upcoming');
+            });
+            
+            pastBtn.addEventListener('click', function() {
+                pastBtn.classList.add('active');
+                allBtn.classList.remove('active');
+                upcomingBtn.classList.remove('active');
+                filterAppointments('past');
+            });
+        }
+        
+        // Handle view details button clicks
+        document.querySelectorAll('.view-details-btn').forEach(function(btn) {
+            new bootstrap.Tooltip(btn, {
+                title: 'View Details',
+                placement: 'top'
+            });
+            
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                cleanupModals(); // Clean up any existing modals first
+                const appointmentId = this.getAttribute('data-appointment-id');
+                const modal = new bootstrap.Modal(document.getElementById('viewModal' + appointmentId));
+                modal.show();
+            });
+        });
+        
+        // Handle cancel button clicks
+        document.querySelectorAll('.cancel-btn').forEach(function(btn) {
+            new bootstrap.Tooltip(btn, {
+                title: 'Cancel Appointment',
+                placement: 'top'
+            });
+            
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                cleanupModals(); // Clean up any existing modals first
+                const appointmentId = this.getAttribute('data-appointment-id');
+                const modal = new bootstrap.Modal(document.getElementById('cancelModal' + appointmentId));
+                modal.show();
+            });
+        });
+        
+        // Handle cancel from details view
+        document.querySelectorAll('.cancel-from-details').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const appointmentId = this.getAttribute('data-appointment-id');
+                const detailsModal = bootstrap.Modal.getInstance(document.getElementById('viewModal' + appointmentId));
+                if (detailsModal) {
+                    detailsModal.hide();
+                }
+                
+                // Clean up before showing the next modal
+                setTimeout(function() {
+                    cleanupModals();
+                    const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal' + appointmentId));
+                    cancelModal.show();
+                }, 500);
+            });
+        });
+        
+        // Ensure modals are cleaned up when the page loads
+        cleanupModals();
+    });
+</script>
+
+<!-- AI Assistant Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/ai-assistant.js') }}"></script>
+{% endblock %}
+
+<!-- Appointment Modals -->
+{% for appointment in appointments %}
+<!-- View Modal -->
+<div class="modal fade" id="viewModal{{ appointment.id }}" tabindex="-1" aria-labelledby="viewModalLabel{{ appointment.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header gradient-card-blue text-white">
+                <h5 class="modal-title" id="viewModalLabel{{ appointment.id }}">Appointment Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <h6 class="text-muted small text-uppercase">Subject</h6>
+                    <p class="mb-0 fw-bold">{{ appointment.subject }}</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted small text-uppercase">Professor</h6>
+                    <p class="mb-0 fw-bold">{{ appointment.professor.get_full_name() }}</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted small text-uppercase">Date & Time</h6>
+                    <p class="mb-0 fw-bold">{{ appointment.start_time.strftime('%A, %B %d, %Y') }} at {{ appointment.start_time.strftime('%I:%M %p') }}</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted small text-uppercase">Status</h6>
+                    <span class="badge rounded-pill bg-{{ 
+                        'warning' if appointment.status == 'pending' else
+                        'success' if appointment.status == 'confirmed' else
+                        'danger' if appointment.status == 'cancelled' else
+                        'info' }}">
+                        {{ appointment.status.title() }}
+                    </span>
+                </div>
+                <div class="mb-0">
+                    <h6 class="text-muted small text-uppercase">Description</h6>
+                    <p class="mb-0">{{ appointment.description or 'No description provided.' }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {% if appointment.status in ['pending', 'confirmed'] and appointment.start_time > now %}
+                <button type="button" class="btn btn-danger cancel-from-details" data-appointment-id="{{ appointment.id }}">
+                    <i class="fas fa-times me-2"></i> Cancel Appointment
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+{% if appointment.status in ['pending', 'confirmed'] and appointment.start_time > now %}
+<div class="modal fade" id="cancelModal{{ appointment.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ appointment.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header gradient-card-red text-white">
+                <h5 class="modal-title" id="cancelModalLabel{{ appointment.id }}">Cancel Appointment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <div class="avatar bg-light text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <h5>Are you sure?</h5>
+                </div>
+                <p>Are you sure you want to cancel your appointment with <strong>{{ appointment.professor.get_full_name() }}</strong> on <strong>{{ appointment.start_time.strftime('%Y-%m-%d') }}</strong> at <strong>{{ appointment.start_time.strftime('%I:%M %p') }}</strong>?</p>
+                <p class="text-danger"><i class="fas fa-info-circle me-2"></i>This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <form action="{{ url_for('student.cancel_appointment', appointment_id=appointment.id) }}" method="POST" class="cancel-appointment-form">
+                    <button type="submit" class="btn btn-danger">Cancel Appointment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<!-- Notification Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-bell me-2"></i>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            <!-- Toast message will appear here -->
+        </div>
+    </div>
+</div>
+
+<!-- AI Preferences Modal -->
+<div class="modal fade" id="aiPreferencesModal" tabindex="-1" aria-labelledby="aiPreferencesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="aiPreferencesModalLabel"><i class="fas fa-cog me-2"></i>AI Assistant Preferences</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="aiPreferencesForm">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-calendar-day me-2"></i>Preferred Meeting Days</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Sunday" id="prefSunday">
+                                        <label class="form-check-label" for="prefSunday">Sunday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Monday" id="prefMonday">
+                                        <label class="form-check-label" for="prefMonday">Monday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Tuesday" id="prefTuesday">
+                                        <label class="form-check-label" for="prefTuesday">Tuesday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Wednesday" id="prefWednesday">
+                                        <label class="form-check-label" for="prefWednesday">Wednesday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Thursday" id="prefThursday">
+                                        <label class="form-check-label" for="prefThursday">Thursday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Friday" id="prefFriday">
+                                        <label class="form-check-label" for="prefFriday">Friday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Saturday" id="prefSaturday">
+                                        <label class="form-check-label" for="prefSaturday">Saturday</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-clock me-2"></i>Preferred Time Range</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="startTime" class="form-label">Start Time</label>
+                                    <select class="form-select" id="startTime" name="start_time">
+                                        <option value="8">8:00 AM</option>
+                                        <option value="9">9:00 AM</option>
+                                        <option value="10">10:00 AM</option>
+                                        <option value="11">11:00 AM</option>
+                                        <option value="12">12:00 PM</option>
+                                        <option value="13">1:00 PM</option>
+                                        <option value="14">2:00 PM</option>
+                                        <option value="15">3:00 PM</option>
+                                        <option value="16">4:00 PM</option>
+                                        <option value="17">5:00 PM</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="endTime" class="form-label">End Time</label>
+                                    <select class="form-select" id="endTime" name="end_time">
+                                        <option value="12">12:00 PM</option>
+                                        <option value="13">1:00 PM</option>
+                                        <option value="14">2:00 PM</option>
+                                        <option value="15">3:00 PM</option>
+                                        <option value="16">4:00 PM</option>
+                                        <option value="17">5:00 PM</option>
+                                        <option value="18">6:00 PM</option>
+                                        <option value="19">7:00 PM</option>
+                                        <option selected value="20">8:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-user-tie me-2"></i>Preferred Professors</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-12 mb-3">
+                                    <select class="form-select" id="preferredProfessors" name="preferred_professors" multiple size="4">
+                                        {% for professor in professors %}
+                                        <option value="{{ professor.id }}">{{ professor.get_full_name() }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">Hold Ctrl (or Cmd on Mac) to select multiple professors</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-sliders-h me-2"></i>Advanced Settings</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="autoRebookToggle" name="auto_rebook">
+                                        <label class="form-check-label" for="autoRebookToggle">Auto-rebook if appointment is cancelled</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="notificationsToggle" name="notifications" checked>
+                                        <label class="form-check-label" for="notificationsToggle">Enable notifications</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="suggestionsToggle" name="suggestions" checked>
+                                        <label class="form-check-label" for="suggestionsToggle">Show AI suggestions</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="autoPlanToggle" name="auto_plan">
+                                        <label class="form-check-label" for="autoPlanToggle">Auto-plan my appointments</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="savePreferencesBtn"><i class="fas fa-save me-2"></i>Save Preferences</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

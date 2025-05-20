@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}My Availability - Professor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">Professor</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.dashboard' }}" href="{{ url_for('professor.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.appointments' }}" href="{{ url_for('professor.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> Appointments
+                            {% if pending_appointments|default([])|length > 0 %}
+                            <span class="badge bg-primary rounded-pill ms-auto">{{ pending_appointments|default([])|length }}</span>
+                            {% endif %}
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.availabilities' }}" href="{{ url_for('professor.availabilities') }}">
+                            <i class="fas fa-clock me-2"></i> Availability
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.ai_assistant' }}" href="{{ url_for('professor.ai_assistant') }}">
+                            <i class="fas fa-robot me-2"></i> AI Assistant
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.profile' }}" href="{{ url_for('main.profile') }}">
+                            <i class="fas fa-user-cog me-2"></i> Profile Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 mb-0">Manage Availability</h2>
+                <button class="btn btn-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#addAvailabilityModal">
+                    <i class="fas fa-plus me-2"></i>Add Time Slot
+                </button>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+
+            <!-- Time Slots List -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table custom-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for availability in availabilities %}
+                                <tr>
+                                    <td>{{ availability.day_of_week }}</td>
+                                    <td>{{ availability.start_time.strftime('%I:%M %p') }}</td>
+                                    <td>{{ availability.end_time.strftime('%I:%M %p') }}</td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#editAvailability{{ availability.id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteAvailability({{ availability.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-clock fa-2x mb-3"></i>
+                                            <p class="mb-0">No availability slots set</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Availability Modal -->
+<div class="modal fade" id="addAvailabilityModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Time Slot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="availabilityForm">
+                    <div class="mb-3">
+                        <label class="form-label">Day of Week</label>
+                        <select class="form-select" name="day_of_week" required>
+                            <option value="">Select Day</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Start Time</label>
+                            <input type="time" class="form-control" name="start_time" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">End Time</label>
+                            <input type="time" class="form-control" name="end_time" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="repeatWeekly" name="repeat_weekly">
+                            <label class="form-check-label" for="repeatWeekly">
+                                Repeat Weekly
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAvailability()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="notificationToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-transparent text-white border-0">
+            <i class="fas fa-bell me-2"></i>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            <!-- Toast message will appear here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tables */
+    .custom-table {
+        margin: 0;
+    }
+    
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .custom-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Calendar */
+    #calendar {
+        height: 400px;
+    }
+</style>
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="{{ url_for('static', filename='js/ai-assistant.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize calendar
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'timeGridWeek,timeGridDay'
+            },
+            slotMinTime: '08:00:00',
+            slotMaxTime: '20:00:00',
+            events: [
+                // Add your availability events here
+                {% for availability in availabilities %}
+                {
+                    title: 'Available',
+                    daysOfWeek: [{{ availability.day_of_week }}],
+                    startTime: '{{ availability.start_time.strftime("%H:%M") }}',
+                    endTime: '{{ availability.end_time.strftime("%H:%M") }}',
+                    backgroundColor: '#198754',
+                    borderColor: '#198754'
+                },
+                {% endfor %}
+            ]
+        });
+        calendar.render();
+        
+        // Initialize toast
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toast = new bootstrap.Toast(notificationToast, {
+            delay: 5000
+        });
+    });
+
+    function saveAvailability() {
+        // Add your save availability logic here
+        showToast('Availability saved successfully!', 'success');
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+    
+    function deleteAvailability(id) {
+        if (confirm('Are you sure you want to delete this availability?')) {
+            fetch(`/professor/delete_availability/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            }).then(() => {
+                showToast('Availability deleted successfully!', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            });
+        }
+    }
+    
+    function showToast(message, type = 'success') {
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // Set toast color based on type
+        notificationToast.className = `toast bg-${type} text-white`;
+        
+        // Set message
+        toastMessage.textContent = message;
+        
+        // Show toast
+        const toast = new bootstrap.Toast(notificationToast);
+        toast.show();
+    }
+</script>
+{% endblock %} 

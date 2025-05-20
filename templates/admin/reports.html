@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Appointment System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">System Administrator</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.dashboard' }}" href="{{ url_for('admin.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Overview
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.users' }}" href="{{ url_for('admin.users') }}">
+                            <i class="fas fa-users me-2"></i> Users Management
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.appointments' }}" href="{{ url_for('admin.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> Appointments
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.reports' }}" href="{{ url_for('admin.reports') }}">
+                            <i class="fas fa-chart-bar me-2"></i> Reports
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 mb-0">System Reports</h2>
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-sm rounded-pill me-2" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Export to PDF
+                    </button>
+                    <button class="btn btn-success btn-sm rounded-pill" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-2"></i>Export to Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Date Range</label>
+                            <select class="form-select" id="dateRange">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month" selected>This Month</option>
+                                <option value="year">This Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4" id="customDateRange" style="display: none;">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-control">
+                        </div>
+                        <div class="col-md-4" id="customDateRange2" style="display: none;">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-lg gradient-card-purple h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle text-white-50 mb-1">Total Appointments</h6>
+                                    <h2 class="card-title mb-0 text-white">{{ total_appointments }}</h2>
+                                </div>
+                                <div class="icon-wrapper bg-white text-purple">
+                                    <i class="fas fa-calendar-check fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-lg gradient-card-blue h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle text-white-50 mb-1">Completed</h6>
+                                    <h2 class="card-title mb-0 text-white">{{ completed_appointments }}</h2>
+                                </div>
+                                <div class="icon-wrapper bg-white text-blue">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-lg gradient-card-green h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle text-white-50 mb-1">Active Users</h6>
+                                    <h2 class="card-title mb-0 text-white">{{ active_users }}</h2>
+                                </div>
+                                <div class="icon-wrapper bg-white text-green">
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-lg gradient-card-orange h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle text-white-50 mb-1">Success Rate</h6>
+                                    <h2 class="card-title mb-0 text-white">{{ success_rate }}%</h2>
+                                </div>
+                                <div class="icon-wrapper bg-white text-orange">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="row g-4">
+                <!-- Appointments by Status -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-lg h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Appointments by Status</h5>
+                            <canvas id="appointmentsByStatus"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Trend -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-lg h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Appointments Trend</h5>
+                            <canvas id="appointmentsTrend"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Professors -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-lg h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Top Professors</h5>
+                            <div class="table-responsive">
+                                <table class="table custom-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Professor</th>
+                                            <th>Appointments</th>
+                                            <th>Rating</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for professor in top_professors %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-light rounded-circle text-primary me-3">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0">{{ professor.name }}</h6>
+                                                        <small class="text-muted">{{ professor.department }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ professor.appointments }}</td>
+                                            <td>
+                                                <div class="text-warning">
+                                                    {% for i in range(professor.rating|int) %}
+                                                    <i class="fas fa-star"></i>
+                                                    {% endfor %}
+                                                    {% if professor.rating != 'N/A' and (professor.rating|float - professor.rating|int) > 0 %}
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-lg h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Recent Activity</h5>
+                            <div class="timeline">
+                                {% for activity in recent_activities %}
+                                <div class="timeline-item">
+                                    <div class="timeline-icon bg-{{ activity.type }}">
+                                        <i class="fas fa-{{ activity.icon }}"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">{{ activity.title }}</h6>
+                                        <p class="text-muted mb-0">{{ activity.description }}</p>
+                                        <small class="text-muted">{{ activity.time }}</small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    .gradient-card-purple {
+        background: linear-gradient(135deg, #6f42c1, #6610f2);
+    }
+    
+    .gradient-card-blue {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    .gradient-card-green {
+        background: linear-gradient(135deg, #198754, #20c997);
+    }
+    
+    .gradient-card-orange {
+        background: linear-gradient(135deg, #fd7e14, #ffc107);
+    }
+    
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    .text-purple { color: #6f42c1 !important; }
+    .text-blue { color: #0d6efd !important; }
+    .text-green { color: #198754 !important; }
+    .text-orange { color: #fd7e14 !important; }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tables */
+    .custom-table {
+        margin: 0;
+    }
+    
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .custom-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Timeline */
+    .timeline {
+        position: relative;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 3rem;
+        padding-bottom: 1.5rem;
+    }
+    
+    .timeline-item:not(:last-child):before {
+        content: '';
+        position: absolute;
+        left: 1rem;
+        top: 2rem;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+    
+    .timeline-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+    
+    .timeline-content {
+        padding: 0.5rem 0;
+    }
+    
+    /* Avatars */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    
+    /* Cards */
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Date range selector
+        document.getElementById('dateRange').addEventListener('change', function() {
+            var customRangeFields = document.querySelectorAll('#customDateRange, #customDateRange2');
+            customRangeFields.forEach(function(field) {
+                field.style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+        });
+
+        // Appointments by Status Chart
+        var statusCtx = document.getElementById('appointmentsByStatus').getContext('2d');
+        var statusData = [
+            {{ status_counts.pending|default(0) }}, 
+            {{ status_counts.approved|default(0) }}, 
+            {{ status_counts.completed|default(0) }}, 
+            {{ status_counts.cancelled|default(0) }}
+        ];
+        
+        // Check if all values are zero
+        var allZero = statusData.every(function(value) { return value === 0; });
+        
+        // If all zero, provide sample data for display purposes
+        if (allZero) {
+            statusData = [2, 3, 1, 1]; // Sample data for visual testing
+        }
+        
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Approved', 'Completed', 'Cancelled'],
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: ['#ffc107', '#0dcaf0', '#198754', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (allZero) {
+                                    return context.label + ': ' + context.raw + ' (Sample Data)';
+                                } else {
+                                    return context.label + ': ' + context.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Appointments Trend Chart
+        var trendCtx = document.getElementById('appointmentsTrend').getContext('2d');
+        var trendData = {{ trend_data }};
+        var trendLabels = {{ trend_labels|tojson }};
+        
+        // Check if all trend values are zero
+        var allTrendZero = trendData.every(function(value) { return value === 0; });
+        
+        // If all zero, provide sample data for visual testing
+        if (allTrendZero) {
+            // Generate sample data with random values between 1-5
+            trendData = Array.from({length: trendLabels.length}, function() {
+                return Math.floor(Math.random() * 5) + 1;
+            });
+        }
+        
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Appointments',
+                    data: trendData,
+                    borderColor: '#0d6efd',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (allTrendZero) {
+                                    return 'Appointments: ' + context.raw + ' (Sample Data)';
+                                } else {
+                                    return 'Appointments: ' + context.raw;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+
+    // Export functions
+    function exportToPDF() {
+        // Implement PDF export functionality
+        console.log('Exporting to PDF...');
+    }
+
+    function exportToExcel() {
+        // Implement Excel export functionality
+        console.log('Exporting to Excel...');
+    }
+</script>
+{% endblock %} 

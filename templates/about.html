@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - Appointment System{% endblock %}
+
+{% block content %}
+<div class="hero-section mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4">About Us</h1>
+                <p class="lead mb-4">Discover the story behind our appointment scheduling system designed to transform the way educational institutions connect.</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-light btn-lg">Contact Us</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg">Get Started</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{{ url_for('static', filename='img/eelu-logo.png') }}" alt="EELU Logo" class="img-fluid" style="max-width: 300px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="section-title">Our Mission</h2>
+            <p class="lead mb-5">We're on a mission to streamline the appointment booking process between professors and students, making education more accessible and efficient for everyone.</p>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-glow">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-calendar-check fa-4x text-primary animated-icon"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Efficient Scheduling</h3>
+                    <p class="mb-0">Our platform eliminates the hassle of back-and-forth emails and provides a seamless scheduling experience.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-glow">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-users fa-4x text-primary animated-icon"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Stronger Connections</h3>
+                    <p class="mb-0">Building better communication channels between professors and students leads to improved academic outcomes.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-glow">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-graduation-cap fa-4x text-primary animated-icon"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Educational Excellence</h3>
+                    <p class="mb-0">We're committed to enhancing the educational experience through innovative technology solutions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-light py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="h1 mb-4">Our Story</h2>
+                <p class="mb-4">The Appointment System was developed as a graduation project by a talented team of students from the Egyptian E-Learning University (EELU) during the 2024-2025 academic year.</p>
+                <p class="mb-4">Recognizing the challenges faced by students and professors in scheduling meetings, our team set out to create an intuitive platform that would streamline the appointment process and enhance academic communication.</p>
+                <p>Under the guidance of distinguished faculty members, we've created a solution that addresses real-world problems faced by educational institutions.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg overflow-hidden">
+                    <div class="card-body p-0">
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Team working together" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="section-title">Meet Our Team</h2>
+            <p class="lead mb-5">Our dedicated team of software engineering students worked tirelessly to create this appointment scheduling system.</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 team-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                            <span class="fs-1">AK</span>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-2">Amr Khaled</h3>
+                    <p class="text-muted mb-3">ID: 21-00499</p>
+                    <p class="mb-3">Full-stack Developer</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Repeat similar cards for other team members -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 team-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                            <span class="fs-1">YE</span>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-2">Yomna Emad</h3>
+                    <p class="text-muted mb-3">ID: 21-01703</p>
+                    <p class="mb-3">UX/UI Designer</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 team-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                            <span class="fs-1">MH</span>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-2">Mariam Hamas</h3>
+                    <p class="text-muted mb-3">ID: 21-02081</p>
+                    <p class="mb-3">Backend Developer</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 team-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                            <span class="fs-1">AE</span>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-2">Ahmed Emad</h3>
+                    <p class="text-muted mb-3">ID: 21-0837</p>
+                    <p class="mb-3">Frontend Developer</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 team-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                            <span class="fs-1">AI</span>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-2">Ahmed Ismail</h3>
+                    <p class="text-muted mb-3">ID: 21-00355</p>
+                    <p class="mb-3">Database Developer</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 team-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                            <span class="fs-1">AS</span>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-2">Ashraf Sobhy</h3>
+                    <p class="text-muted mb-3">ID: 21-00521</p>
+                    <p class="mb-3">QA Engineer</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 team-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                            <span class="fs-1">YH</span>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-2">Youssef Hassan</h3>
+                    <p class="text-muted mb-3">ID: 21-01741</p>
+                    <p class="mb-3">DevOps Engineer</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4 mb-5">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('main.contact') }}" class="btn btn-primary btn-lg">Get in Touch</a>
+        </div>
+    </div>
+</div>
+
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="section-title">Our Supervisors</h2>
+                <p class="lead mb-5">This project was created under the guidance of these distinguished faculty members.</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-6 mb-4">
+                <div class="card h-100 supervisor-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                                <i class="fas fa-user-tie fa-3x"></i>
+                            </div>
+                        </div>
+                        <h3 class="h4 mb-2">PROF. DR. EMAN HOSNY</h3>
+                        <p class="text-muted mb-3">Project Supervisor</p>
+                        <p class="mb-3">Faculty of Computer Science, EELU</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-5 col-md-6 mb-4">
+                <div class="card h-100 supervisor-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <div class="avatar d-inline-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style="width: 100px; height: 100px;">
+                                <i class="fas fa-user-tie fa-3x"></i>
+                            </div>
+                        </div>
+                        <h3 class="h4 mb-2">ENG. Mohamed Kamal</h3>
+                        <p class="text-muted mb-3">Project Advisor</p>
+                        <p class="mb-3">Faculty of Computer Science, EELU</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,617 @@
+{% extends "base.html" %}
+
+{% block title %}AI Appointment Assistant - Appointment System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">Student</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.dashboard' }}" href="{{ url_for('student.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.book_appointment' }}" href="{{ url_for('student.book_appointment') }}">
+                            <i class="fas fa-calendar-plus me-2"></i> Book Appointment
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.ai_assistant' }}" href="{{ url_for('student.ai_assistant') }}">
+                            <i class="fas fa-robot me-2"></i> AI Assistant
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'student.appointments' }}" href="{{ url_for('student.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> My Appointments
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.profile' }}" href="{{ url_for('main.profile') }}">
+                            <i class="fas fa-user-cog me-2"></i> Profile Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- AI Assistant Hero -->
+            <section class="mb-5">
+                <div class="card border-0 shadow-lg overflow-hidden ai-hero-card">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-7">
+                                <h2 class="h3 mb-3 fw-bold">
+                                    <i class="fas fa-brain text-primary me-2"></i>
+                                    AI Appointment Assistant
+                                </h2>
+                                <p class="lead mb-4">Your personal AI assistant analyzes your academic patterns and professor schedules to recommend the optimal meeting times.</p>
+                                <div class="d-flex gap-2 mb-2">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="aiAssistToggle" checked>
+                                        <label class="form-check-label" for="aiAssistToggle">Enable AI assistance</label>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button id="updateRecommendationsBtn" class="btn btn-primary">
+                                        <i class="fas fa-sync-alt me-2"></i>Update Recommendations
+                                    </button>
+                                    <button id="setPreferencesBtn" class="btn btn-primary d-flex align-items-center gap-2">
+                                        <i class="fas fa-cog"></i> Set Preferences
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-5 text-center">
+                                <div class="ai-robot-animation">
+                                    <i class="fas fa-robot fa-6x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Recommendations Section -->
+            <section class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-primary text-white p-3">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Smart Recommendations
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="border rounded p-3 h-100 recommendation-card">
+                                    <h4 class="h6 fw-bold mb-3">Optimal Days</h4>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        {% for day in ai_recommendations.optimal_days %}
+                                            <span class="badge bg-primary-subtle text-primary p-2">{{ day }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="text-muted small mb-0">Based on your previous appointments and academic schedule</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="border rounded p-3 h-100 recommendation-card">
+                                    <h4 class="h6 fw-bold mb-3">Optimal Times</h4>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        {% for time in ai_recommendations.optimal_times %}
+                                            <span class="badge bg-primary-subtle text-primary p-2">{{ time }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="text-muted small mb-0">Generated from your productivity patterns</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info p-3">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-info-circle fa-2x text-info me-3"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="alert-heading h6 mb-1">Auto-Rebooking Enabled</h5>
+                                            <p class="mb-0 small">If any of your appointments get canceled, the AI will automatically find and book the next best available slot with the same professor.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Insights Section -->
+            <section class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-info text-white p-3">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Appointment Insights
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h4 class="h6 mb-3">Your Appointment Pattern by Day</h4>
+                                <div class="chart-container" style="height: 200px;">
+                                    <canvas id="dayChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4 class="h6 mb-3">Your Appointment Pattern by Time</h4>
+                                <div class="chart-container" style="height: 200px;">
+                                    <canvas id="timeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <h4 class="h6 mb-3">AI Analysis</h4>
+                                    <p class="mb-0">
+                                        Based on your past {{ previous_appointments|length }} appointments, you prefer meeting with professors on 
+                                        <strong>{% if appointment_days %}{{ list(appointment_days.keys())[0] }}s{% else %}weekdays{% endif %}</strong> 
+                                        during 
+                                        <strong>{% if appointment_times %}{{ list(appointment_times.keys())[0] }}{% else %}business hours{% endif %}</strong>. 
+                                        The AI assistant will prioritize these time slots when making recommendations.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Book Recommended Slots -->
+            <section>
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-success text-white p-3">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Recommended Available Slots
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+                            {% for professor in professors[:3] %}
+                            <div class="col">
+                                <div class="card h-100 border-0 shadow recommendation-slot">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user-tie"></i>
+                                            </div>
+                                            <h5 class="card-title mb-0 h6">{{ professor.get_full_name() }}</h5>
+                                        </div>
+                                        
+                                        <div class="recommended-times mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="far fa-calendar me-1"></i>{{ ai_recommendations.optimal_days[0] }}
+                                                </span>
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="far fa-clock me-1"></i>{{ ai_recommendations.optimal_times[0] }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-grid">
+                                            <a href="{{ url_for('student.book_appointment') }}?professor_id={{ professor.id }}" class="btn btn-sm btn-primary">
+                                                Book Now
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('student.book_appointment') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-search me-2"></i>Find More Available Times
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="notificationToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-transparent text-white border-0">
+            <i class="fas fa-bell me-2"></i>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            <!-- Toast message will appear here -->
+        </div>
+    </div>
+</div>
+
+<!-- AI Preferences Modal -->
+<div class="modal fade" id="aiPreferencesModal" tabindex="-1" aria-labelledby="aiPreferencesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="aiPreferencesModalLabel"><i class="fas fa-cog me-2"></i>AI Assistant Preferences</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="aiPreferencesForm">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-calendar-day me-2"></i>Preferred Meeting Days</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Sunday" id="prefSunday">
+                                        <label class="form-check-label" for="prefSunday">Sunday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Monday" id="prefMonday">
+                                        <label class="form-check-label" for="prefMonday">Monday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Tuesday" id="prefTuesday">
+                                        <label class="form-check-label" for="prefTuesday">Tuesday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Wednesday" id="prefWednesday">
+                                        <label class="form-check-label" for="prefWednesday">Wednesday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Thursday" id="prefThursday">
+                                        <label class="form-check-label" for="prefThursday">Thursday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Friday" id="prefFriday">
+                                        <label class="form-check-label" for="prefFriday">Friday</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preferred_days" value="Saturday" id="prefSaturday">
+                                        <label class="form-check-label" for="prefSaturday">Saturday</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-clock me-2"></i>Preferred Time Range</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="startTime" class="form-label">Start Time</label>
+                                    <select class="form-select" id="startTime" name="start_time">
+                                        <option value="8">8:00 AM</option>
+                                        <option value="9">9:00 AM</option>
+                                        <option value="10">10:00 AM</option>
+                                        <option value="11">11:00 AM</option>
+                                        <option value="12">12:00 PM</option>
+                                        <option value="13">1:00 PM</option>
+                                        <option value="14">2:00 PM</option>
+                                        <option value="15">3:00 PM</option>
+                                        <option value="16">4:00 PM</option>
+                                        <option value="17">5:00 PM</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="endTime" class="form-label">End Time</label>
+                                    <select class="form-select" id="endTime" name="end_time">
+                                        <option value="12">12:00 PM</option>
+                                        <option value="13">1:00 PM</option>
+                                        <option value="14">2:00 PM</option>
+                                        <option value="15">3:00 PM</option>
+                                        <option value="16">4:00 PM</option>
+                                        <option value="17">5:00 PM</option>
+                                        <option value="18">6:00 PM</option>
+                                        <option value="19">7:00 PM</option>
+                                        <option selected value="20">8:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-user-tie me-2"></i>Preferred Professors</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-12 mb-3">
+                                    <select class="form-select" id="preferredProfessors" name="preferred_professors" multiple size="4">
+                                        <option value="1">Dr. Ahmed Mohamed</option>
+                                        <option value="2">Dr. Sarah Hassan</option>
+                                        <option value="3">Dr. Mohamed Ibrahim</option>
+                                        <option value="4">Dr. Fatma El-Sayed</option>
+                                        <option value="5">Dr. Khaled Ahmed</option>
+                                        <option value="6">Dr. Aisha Mahmoud</option>
+                                    </select>
+                                    <div class="form-text">Hold Ctrl (or Cmd on Mac) to select multiple professors</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-sliders-h me-2"></i>Advanced Settings</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="autoRebookToggle" name="auto_rebook">
+                                        <label class="form-check-label" for="autoRebookToggle">Auto-rebook if appointment is cancelled</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="notificationsToggle" name="notifications" checked>
+                                        <label class="form-check-label" for="notificationsToggle">Enable notifications</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="suggestionsToggle" name="suggestions" checked>
+                                        <label class="form-check-label" for="suggestionsToggle">Show AI suggestions</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="autoPlanToggle" name="auto_plan">
+                                        <label class="form-check-label" for="autoPlanToggle">Auto-plan my appointments</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="savePreferencesBtn"><i class="fas fa-save me-2"></i>Save Preferences</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS for AI Assistant -->
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    .gradient-card-purple {
+        background: linear-gradient(135deg, #6f42c1, #6610f2);
+    }
+    
+    .gradient-card-blue {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    .gradient-card-green {
+        background: linear-gradient(135deg, #198754, #20c997);
+    }
+    
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    .text-purple { color: #6f42c1 !important; }
+    .text-blue { color: #0d6efd !important; }
+    .text-green { color: #198754 !important; }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .recommendation-card {
+        transition: all 0.3s ease;
+    }
+    
+    .recommendation-card:hover {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
+    }
+    
+    .recommendation-slot {
+        transition: all 0.3s ease;
+    }
+    
+    .recommendation-slot:hover {
+        transform: scale(1.03);
+    }
+    
+    .badge.bg-primary-subtle {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .ai-hero-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+    }
+    
+    .ai-robot-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    .chart-container {
+        position: relative;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/ai-assistant.js') }}"></script>
+<script>
+    function getPersonalizedRecommendations() {
+        fetch('/student/ai/recommendations')
+            .then(response => response.json())
+            .then(data => {
+                // Example: update optimal days
+                const daysElem = document.querySelector('.recommendation-card .d-flex.flex-wrap.gap-2.mb-3');
+                if (daysElem && data.optimal_days) {
+                    daysElem.innerHTML = data.optimal_days.map(day =>
+                        `<span class="badge bg-primary-subtle text-primary p-2">${day}</span>`
+                    ).join('');
+                }
+                // Example: update optimal times (second card)
+                const timesElem = document.querySelectorAll('.recommendation-card .d-flex.flex-wrap.gap-2.mb-3')[1];
+                if (timesElem && data.optimal_times) {
+                    timesElem.innerHTML = data.optimal_times.map(time =>
+                        `<span class="badge bg-primary-subtle text-primary p-2">${time}</span>`
+                    ).join('');
+                }
+                // You can update more of the DOM as needed
+            })
+            .catch(() => {
+                alert('Failed to fetch recommendations.');
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prepare data for charts
+        const dayLabels = {{ appointment_days.keys()|list|tojson if appointment_days else ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']|tojson }};
+        const dayData = {{ appointment_days.values()|list|tojson if appointment_days else [0, 0, 0, 0, 0]|tojson }};
+        
+        const timeLabels = {{ appointment_times.keys()|list|tojson if appointment_times else ['9:00 - 10:00', '11:00 - 12:00', '13:00 - 14:00', '15:00 - 16:00']|tojson }};
+        const timeData = {{ appointment_times.values()|list|tojson if appointment_times else [0, 0, 0, 0]|tojson }};
+        
+        // Day Chart
+        const dayChartElement = document.getElementById('dayChart');
+        if (dayChartElement) {
+            const dayChart = new Chart(
+                dayChartElement,
+                {
+                    type: 'bar',
+                    data: {
+                        labels: dayLabels,
+                        datasets: [{
+                            label: 'Appointments',
+                            data: dayData,
+                            backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                            borderColor: 'rgb(13, 110, 253)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+        }
+        
+        // Time Chart
+        const timeChartElement = document.getElementById('timeChart');
+        if (timeChartElement) {
+            const timeChart = new Chart(
+                timeChartElement,
+                {
+                    type: 'bar',
+                    data: {
+                        labels: timeLabels,
+                        datasets: [{
+                            label: 'Appointments',
+                            data: timeData,
+                            backgroundColor: 'rgba(23, 162, 184, 0.6)',
+                            borderColor: 'rgb(23, 162, 184)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+        }
+        
+        // Connect buttons to AI assistant functions
+        const updateRecommendationsBtn = document.getElementById('updateRecommendationsBtn');
+        if (updateRecommendationsBtn) {
+            updateRecommendationsBtn.addEventListener('click', function() {
+                getPersonalizedRecommendations();
+            });
+        }
+        
+        const setPreferencesBtn = document.getElementById('setPreferencesBtn');
+        if (setPreferencesBtn) {
+            setPreferencesBtn.addEventListener('click', function() {
+                showPreferencesModal();
+            });
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block title %}User: {{ user.username }} - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">System Administrator</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.dashboard' }}" href="{{ url_for('admin.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Overview
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.users' }}" href="{{ url_for('admin.users') }}">
+                            <i class="fas fa-users me-2"></i> Users Management
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.appointments' }}" href="{{ url_for('admin.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> Appointments
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.reports' }}" href="{{ url_for('admin.reports') }}">
+                            <i class="fas fa-chart-bar me-2"></i> Reports
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 mb-0">User Details</h2>
+                <div>
+                    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary btn-sm rounded-pill">
+                        <i class="fas fa-edit me-2"></i>Edit User
+                    </a>
+                    <form action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-{{ 'danger' if user.is_active else 'success' }} btn-sm rounded-pill">
+                            <i class="fas fa-power-off me-2"></i>{{ 'Deactivate' if user.is_active else 'Activate' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- User Profile Card -->
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center border-end">
+                            <div class="avatar bg-light text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px;">
+                                <i class="fas fa-{{ 'user-shield' if user.is_admin() else 'user-tie' if user.is_professor() else 'user-graduate' }} fa-3x"></i>
+                            </div>
+                            <h4 class="mb-0">{{ user.get_full_name() }}</h4>
+                            <p class="text-muted mb-2">@{{ user.username }}</p>
+                            <span class="badge rounded-pill bg-{{ 'primary' if user.is_admin() else 'info' if user.is_professor() else 'secondary' }} px-3 py-2 mb-3">
+                                {{ user.role.title() }}
+                            </span>
+                            <div class="mt-3">
+                                <span class="badge rounded-pill bg-{{ 'success' if user.is_active else 'danger' }} px-3 py-2">
+                                    {{ 'Active' if user.is_active else 'Inactive' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="border-bottom pb-2 mb-3">User Information</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">Full Name</div>
+                                <div class="col-md-8">{{ user.get_full_name() }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">Username</div>
+                                <div class="col-md-8">{{ user.username }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">Email Address</div>
+                                <div class="col-md-8">{{ user.email }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">Role</div>
+                                <div class="col-md-8">{{ user.role.title() }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">Status</div>
+                                <div class="col-md-8">
+                                    <span class="badge rounded-pill bg-{{ 'success' if user.is_active else 'danger' }}">
+                                        {{ 'Active' if user.is_active else 'Inactive' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 fw-bold">Date Joined</div>
+                                <div class="col-md-8">{{ user.created_at.strftime('%B %d, %Y') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Appointments -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-check me-2"></i> 
+                        User Appointments 
+                        <span class="badge bg-white text-primary rounded-pill ms-2">{{ appointments|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table custom-table mb-0">
+                            <thead>
+                                <tr>
+                                    {% if user.is_student() %}
+                                    <th>Professor</th>
+                                    {% else %}
+                                    <th>Student</th>
+                                    {% endif %}
+                                    <th>Date & Time</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded-circle text-primary me-3">
+                                                <i class="fas fa-{{ 'user-tie' if user.is_student() else 'user-graduate' }}"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">
+                                                    {% if user.is_student() %}
+                                                    {{ appointment.professor.get_full_name() }}
+                                                    {% else %}
+                                                    {{ appointment.student.get_full_name() }}
+                                                    {% endif %}
+                                                </h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <h6 class="mb-0">{{ appointment.start_time.strftime('%B %d, %Y') }}</h6>
+                                            <small class="text-muted">
+                                                {{ appointment.start_time.strftime('%I:%M %p') }} - 
+                                                {{ appointment.end_time.strftime('%I:%M %p') }}
+                                            </small>
+                                        </div>
+                                    </td>
+                                    <td>{{ appointment.subject }}</td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-{{ 
+                                            'warning' if appointment.status == 'pending' else
+                                            'success' if appointment.status == 'confirmed' else
+                                            'danger' if appointment.status == 'cancelled' else
+                                            'info' }}">
+                                            {{ appointment.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-light view-appointment-btn" 
+                                                    data-appointment-id="{{ appointment.id }}" 
+                                                    data-bs-toggle="tooltip" 
+                                                    title="View Details">
+                                                <i class="fas fa-eye text-primary"></i>
+                                            </button>
+                                            {% if appointment.status == 'pending' %}
+                                                <form action="{{ url_for('admin.approve_appointment', appointment_id=appointment.id) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Approve">
+                                                        <i class="fas fa-check text-success"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ url_for('admin.reject_appointment', appointment_id=appointment.id) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Reject">
+                                                        <i class="fas fa-times text-danger"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="lead mb-0">No appointments found for this user</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light py-3">
+                    <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Details Modal -->
+<div class="modal fade" id="appointmentDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Appointment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="appointmentDetailsContent" class="p-3">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading appointment details...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tables */
+    .custom-table {
+        margin: 0;
+    }
+    
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .custom-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Avatars */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    
+    /* Cards */
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Buttons */
+    .btn-light {
+        background: #f8f9fa;
+        border: none;
+        padding: 0.5rem;
+        line-height: 1;
+        border-radius: 8px;
+    }
+    
+    .btn-light:hover {
+        background: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Initialize appointment details modal
+        var appointmentDetailsModal = new bootstrap.Modal(document.getElementById('appointmentDetailsModal'));
+        
+        // Handle view appointment button clicks
+        var viewAppointmentButtons = document.querySelectorAll('.view-appointment-btn');
+        viewAppointmentButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var appointmentId = this.getAttribute('data-appointment-id');
+                var detailsContent = document.getElementById('appointmentDetailsContent');
+                
+                // Show loading indicator
+                detailsContent.innerHTML = `
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading appointment details...</p>
+                    </div>
+                `;
+                
+                // Open the modal
+                appointmentDetailsModal.show();
+                
+                // Fetch appointment details via API
+                fetch('/admin/api/appointment/' + appointmentId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            var appointment = data.appointment;
+                            
+                            // Update modal content
+                            detailsContent.innerHTML = `
+                                <div class="mb-4 text-center">
+                                    <span class="badge rounded-pill bg-${
+                                        appointment.status === 'pending' ? 'warning' : 
+                                        appointment.status === 'confirmed' ? 'success' : 
+                                        appointment.status === 'cancelled' ? 'danger' : 'info'
+                                    } px-3 py-2 mb-3">
+                                        ${appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                                    </span>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted d-block">Subject</label>
+                                    <h5>${appointment.subject}</h5>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="text-muted d-block">Date</label>
+                                        <p class="mb-0">${appointment.date}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="text-muted d-block">Time</label>
+                                        <p class="mb-0">${appointment.time}</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="text-muted d-block">Student</label>
+                                        <p class="mb-0">${appointment.student.name}</p>
+                                        <small class="text-muted">${appointment.student.email}</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="text-muted d-block">Professor</label>
+                                        <p class="mb-0">${appointment.professor.name}</p>
+                                        <small class="text-muted">${appointment.professor.email}</small>
+                                    </div>
+                                </div>
+                                ${appointment.status === 'pending' ? `
+                                <div class="d-flex justify-content-center mt-4">
+                                    <form action="/admin/approve_appointment/${appointment.id}" method="post" class="me-2">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-check me-2"></i>Approve
+                                        </button>
+                                    </form>
+                                    <form action="/admin/reject_appointment/${appointment.id}" method="post">
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fas fa-times me-2"></i>Reject
+                                        </button>
+                                    </form>
+                                </div>
+                                ` : ''}
+                            `;
+                        } else {
+                            detailsContent.innerHTML = `
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    ${data.message || 'Failed to load appointment details.'}
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        detailsContent.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                Error loading appointment details. Please try again.
+                            </div>
+                        `;
+                        console.error('Error fetching appointment details:', error);
+                    });
+            });
+        });
+    });
+</script>
+{% endblock %} 

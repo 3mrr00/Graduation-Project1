@@ -1,0 +1,539 @@
+{% extends "base.html" %}
+
+{% block title %}Professor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">Professor</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.dashboard' }}" href="{{ url_for('professor.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.appointments' }}" href="{{ url_for('professor.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> Appointments
+                            {% if pending_appointments|length > 0 %}
+                            <span class="badge bg-primary rounded-pill ms-auto">{{ pending_appointments|length }}</span>
+                            {% endif %}
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.availabilities' }}" href="{{ url_for('professor.availabilities') }}">
+                            <i class="fas fa-clock me-2"></i> Availability
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.ai_assistant' }}" href="{{ url_for('professor.ai_assistant') }}">
+                            <i class="fas fa-robot me-2"></i> AI Assistant
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.profile' }}" href="{{ url_for('main.profile') }}">
+                            <i class="fas fa-user-cog me-2"></i> Profile Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Welcome Message -->
+            <section id="overview" class="mb-4">
+                <h2 class="h4 mb-4">Welcome, Dr. {{ current_user.first_name }}!</h2>
+                
+                <!-- Stats Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-purple">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Total Appointments</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ appointments|default([])|length }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-purple">
+                                        <i class="fas fa-calendar-check fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-blue">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Pending Requests</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ pending_appointments|default([])|length }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-blue">
+                                        <i class="fas fa-clock fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-green">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Completed Today</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ completed_today|default(0) }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-green">
+                                        <i class="fas fa-check-circle fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-orange">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Total Students</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ total_students|default(0) }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-orange">
+                                        <i class="fas fa-users fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Today's Schedule -->
+            <section id="today-schedule" class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h4 mb-0">Today's Schedule</h2>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-light btn-sm" onclick="previousDay()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="btn btn-light btn-sm" onclick="nextDay()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-0">
+                        <div class="schedule-timeline">
+                            {% for hour in range(9, 18) %}
+                            <div class="timeline-slot">
+                                <div class="time">{{ "%02d:00"|format(hour) }}</div>
+                                <div class="slot-content">
+                                    {% for appointment in todays_appointments|default([]) %}
+                                    {% if appointment.start_time.hour == hour %}
+                                    <div class="appointment-card bg-{{ appointment.status }}-subtle">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="fw-bold mb-1">{{ appointment.student.get_full_name() }}</h6>
+                                                <small class="text-muted">{{ appointment.subject }}</small>
+                                            </div>
+                                            <span class="badge bg-{{ appointment.status }}">
+                                                {{ appointment.status|title }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% if not todays_appointments|default([])|length %}
+                            <div class="text-center py-5">
+                                <img src="{{ url_for('static', filename='img/empty-calendar.svg') }}" alt="No appointments" class="mb-3" style="width: 120px;">
+                                <h6 class="text-muted">No appointments scheduled for today</h6>
+                                <p class="text-muted small mb-0">Enjoy your free time!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pending Requests and Stats -->
+            <div class="row g-4">
+                <!-- Pending Requests -->
+                <div class="col-lg-7">
+                    <section id="pending-requests" class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h4 mb-0">Pending Requests</h2>
+                            {% if pending_appointments|default([])|length > 5 %}
+                            <a href="{{ url_for('professor.appointments') }}" class="btn btn-primary btn-sm rounded-pill">
+                                <i class="fas fa-list me-2"></i>View All
+                            </a>
+                            {% endif %}
+                        </div>
+                        <div class="card border-0 shadow-lg">
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush">
+                                    {% for appointment in pending_appointments[:5]|default([]) %}
+                                    <div class="list-group-item p-4">
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="fw-bold mb-1">{{ appointment.student.get_full_name() }}</h6>
+                                                <small class="text-muted d-flex align-items-center">
+                                                    <i class="fas fa-calendar-alt me-2"></i>
+                                                    {{ appointment.start_time.strftime('%B %d, %I:%M %p') }}
+                                                </small>
+                                                <p class="mb-0 mt-2 text-muted">{{ appointment.subject }}</p>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-success" onclick="approveAppointment({{ appointment.id }})" data-bs-toggle="tooltip" title="Approve">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="rejectAppointment({{ appointment.id }})" data-bs-toggle="tooltip" title="Reject">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="text-center py-5">
+                                        <img src="{{ url_for('static', filename='img/empty-inbox.svg') }}" alt="No requests" class="mb-3" style="width: 120px;">
+                                        <h6 class="text-muted">No pending requests</h6>
+                                        <p class="text-muted small mb-0">You're all caught up!</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Stats -->
+                <div class="col-lg-5">
+                    <section id="appointment-stats" class="mb-4">
+                        <h2 class="h4 mb-4">Appointment Stats</h2>
+                        <div class="card border-0 shadow-lg">
+                            <div class="card-body">
+                                <canvas id="appointmentStats" height="220"></canvas>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- AI Insights Section -->
+            <section id="ai-insights" class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h4 mb-0">AI Insights</h2>
+                    <a href="{{ url_for('professor.ai_assistant') }}" class="btn btn-primary btn-sm rounded-pill">
+                        <i class="fas fa-robot me-2"></i>AI Assistant
+                    </a>
+                </div>
+                <div class="card border-0 shadow-lg gradient-card-blue text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="fas fa-lightbulb fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="card-title mb-1">Smart Suggestions</h5>
+                                <p class="card-text mb-0">AI-powered insights to optimize your availability and appointment scheduling.</p>
+                            </div>
+                        </div>
+                        <div class="alert bg-white bg-opacity-25 mb-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-3">
+                                    <i class="fas fa-info-circle fa-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Students prefer meeting on <strong>Tuesdays and Thursdays</strong> between <strong>10:00 AM - 12:00 PM</strong>. Consider adding more availability during these times.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="notificationToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-transparent text-white border-0">
+            <i class="fas fa-bell me-2"></i>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            <!-- Toast message will appear here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    .gradient-card-purple {
+        background: linear-gradient(135deg, #6f42c1, #6610f2);
+    }
+    
+    .gradient-card-blue {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    .gradient-card-green {
+        background: linear-gradient(135deg, #198754, #20c997);
+    }
+    
+    .gradient-card-orange {
+        background: linear-gradient(135deg, #fd7e14, #ffc107);
+    }
+    
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    .text-purple { color: #6f42c1 !important; }
+    .text-blue { color: #0d6efd !important; }
+    .text-green { color: #198754 !important; }
+    .text-orange { color: #fd7e14 !important; }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Schedule Timeline */
+    .schedule-timeline {
+        position: relative;
+    }
+    
+    .timeline-slot {
+        display: flex;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+    
+    .timeline-slot:last-child {
+        border-bottom: none;
+    }
+    
+    .timeline-slot .time {
+        width: 80px;
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+    
+    .timeline-slot .slot-content {
+        flex: 1;
+        margin-left: 1.5rem;
+        min-height: 30px;
+    }
+    
+    .appointment-card {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s;
+    }
+    
+    .appointment-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .appointment-card:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Status Colors */
+    .bg-pending-subtle {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+    
+    .bg-confirmed-subtle {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .bg-completed-subtle {
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+    
+    .bg-cancelled-subtle {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    
+    /* Cards */
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Buttons */
+    .btn-light {
+        background: #f8f9fa;
+        border: none;
+        padding: 0.5rem;
+        line-height: 1;
+        border-radius: 8px;
+    }
+    
+    .btn-light:hover {
+        background: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/ai-assistant.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Initialize toast
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toast = new bootstrap.Toast(notificationToast, {
+            delay: 5000
+        });
+        
+        // Show notification for new appointment requests
+        if ({{ pending_appointments|default([])|length }} > 0) {
+            toastMessage.innerHTML = 'You have {{ pending_appointments|default([])|length }} new appointment request(s)';
+            toast.show();
+        }
+        
+        // Appointment Stats Chart
+        const ctx = document.getElementById('appointmentStats').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Pending', 'Cancelled'],
+                datasets: [{
+                    data: [
+                        {{ completed_appointments|default(0) }},
+                        {{ pending_appointments|default([])|length }},
+                        {{ cancelled_appointments|default(0) }}
+                    ],
+                    backgroundColor: [
+                        'rgba(25, 135, 84, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(220, 53, 69, 0.8)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                },
+                cutout: '75%'
+            }
+        });
+    });
+
+    function approveAppointment(id) {
+        if (confirm('Are you sure you want to approve this appointment?')) {
+            fetch(`/professor/update_appointment_status/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `status=confirmed`
+            }).then(() => window.location.reload());
+        }
+    }
+
+    function rejectAppointment(id) {
+        if (confirm('Are you sure you want to reject this appointment?')) {
+            fetch(`/professor/update_appointment_status/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `status=cancelled`
+            }).then(() => window.location.reload());
+        }
+    }
+
+    let currentDate = new Date();
+
+    function previousDay() {
+        currentDate.setDate(currentDate.getDate() - 1);
+        updateSchedule();
+    }
+
+    function nextDay() {
+        currentDate.setDate(currentDate.getDate() + 1);
+        updateSchedule();
+    }
+
+    function updateSchedule() {
+        const formattedDate = currentDate.toISOString().split('T')[0];
+        window.location.href = `${window.location.pathname}?date=${formattedDate}`;
+    }
+    
+    // Show notification toast
+    function showToast(message, type = 'success') {
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // Set toast color based on type
+        notificationToast.className = `toast bg-${type} text-white`;
+        
+        // Set message
+        toastMessage.textContent = message;
+        
+        // Show toast
+        const toast = new bootstrap.Toast(notificationToast);
+        toast.show();
+    }
+</script>
+{% endblock %} 

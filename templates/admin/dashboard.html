@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Appointment System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">System Administrator</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.dashboard' }}" href="{{ url_for('admin.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Overview
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.users' }}" href="{{ url_for('admin.users') }}">
+                            <i class="fas fa-users me-2"></i> Users Management
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.appointments' }}" href="{{ url_for('admin.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> Appointments
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'admin.reports' }}" href="{{ url_for('admin.reports') }}">
+                            <i class="fas fa-chart-bar me-2"></i> Reports
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Overview Section -->
+            <section id="overview" class="mb-5">
+                <h2 class="h4 mb-4">System Overview</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-purple">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Total Users</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ total_users }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-purple">
+                                        <i class="fas fa-users fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-blue">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Active Appointments</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ active_appointments }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-blue">
+                                        <i class="fas fa-calendar-check fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-lg gradient-card-green">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle text-white-50 mb-1">Total Professors</h6>
+                                        <h2 class="card-title mb-0 text-white">{{ total_professors }}</h2>
+                                    </div>
+                                    <div class="icon-wrapper bg-white text-green">
+                                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Management Section -->
+            <section id="users" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h4 mb-0">Users Management</h2>
+                    <a href="{{ url_for('admin.users') }}" class="btn btn-primary btn-sm rounded-pill">
+                        <i class="fas fa-users me-2"></i>View All Users
+                    </a>
+                </div>
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table custom-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light rounded-circle text-primary me-3">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ user.get_full_name() }}</h6>
+                                                    <small class="text-muted">@{{ user.username }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ user.email }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill bg-{{ 'primary' if user.is_admin() else 'info' if user.is_professor() else 'secondary' }}">
+                                                {{ user.role }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill bg-{{ 'success' if user.is_active else 'danger' }}">
+                                                {{ 'Active' if user.is_active else 'Inactive' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="View Details">
+                                                    <i class="fas fa-eye text-primary"></i>
+                                                </a>
+                                                <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Edit User">
+                                                    <i class="fas fa-edit text-primary"></i>
+                                                </a>
+                                                <form action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="{{ 'Deactivate' if user.is_active else 'Activate' }}">
+                                                        <i class="fas fa-{{ 'ban' if user.is_active else 'check' }} text-{{ 'danger' if user.is_active else 'success' }}"></i>
+                                                    </button>
+                                                </form>
+                                                <button type="button" class="btn btn-sm btn-light delete-user-btn" data-user-id="{{ user.id }}" data-user-name="{{ user.get_full_name() }}" data-bs-toggle="tooltip" title="Delete">
+                                                    <i class="fas fa-trash text-danger"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Appointments Section -->
+            <section id="appointments">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h4 mb-0">Recent Appointments</h2>
+                    <a href="{{ url_for('admin.appointments') }}" class="btn btn-link text-decoration-none">View All</a>
+                </div>
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table custom-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Professor</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in recent_appointments %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light rounded-circle text-primary me-3">
+                                                    <i class="fas fa-user-graduate"></i>
+                                                </div>
+                                                <span>{{ appointment.student.get_full_name() }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light rounded-circle text-primary me-3">
+                                                    <i class="fas fa-chalkboard-teacher"></i>
+                                                </div>
+                                                <span>{{ appointment.professor.get_full_name() }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="far fa-calendar-alt text-muted me-2"></i>
+                                                {{ appointment.start_time.strftime('%Y-%m-%d') }}
+                                                <br>
+                                                <i class="far fa-clock text-muted me-2"></i>
+                                                {{ appointment.start_time.strftime('%H:%M') }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill bg-{{ 'warning' if appointment.status == 'pending' else 'success' if appointment.status == 'confirmed' else 'danger' }}">
+                                                {{ appointment.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('admin.appointments') }}" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="View Details">
+                                                    <i class="fas fa-eye text-primary"></i>
+                                                </a>
+                                                {% if appointment.status == 'pending' %}
+                                                <form action="{{ url_for('admin.approve_appointment', appointment_id=appointment.id) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Approve">
+                                                        <i class="fas fa-check text-success"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ url_for('admin.reject_appointment', appointment_id=appointment.id) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Reject">
+                                                        <i class="fas fa-times text-danger"></i>
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete user <span id="userName"></span>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteUserForm" action="" method="post">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    .gradient-card-purple {
+        background: linear-gradient(135deg, #6f42c1, #6610f2);
+    }
+    
+    .gradient-card-blue {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    .gradient-card-green {
+        background: linear-gradient(135deg, #198754, #20c997);
+    }
+    
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    .text-purple { color: #6f42c1 !important; }
+    .text-blue { color: #0d6efd !important; }
+    .text-green { color: #198754 !important; }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tables */
+    .custom-table {
+        margin: 0;
+    }
+    
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .custom-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Avatars */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    
+    /* Cards */
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Buttons */
+    .btn-light {
+        background: #f8f9fa;
+        border: none;
+        padding: 0.5rem;
+        line-height: 1;
+        border-radius: 8px;
+    }
+    
+    .btn-light:hover {
+        background: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap components
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        var deleteUserModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+        
+        // Handle delete user button clicks
+        var deleteUserButtons = document.querySelectorAll('.delete-user-btn');
+        deleteUserButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var userId = this.getAttribute('data-user-id');
+                var userName = this.getAttribute('data-user-name');
+                
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('deleteUserForm').action = '/admin/delete_user/' + userId;
+                
+                deleteUserModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %} 

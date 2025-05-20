@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Appointment System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="logo-container mb-3 pulse">
+                            <img src="{{ url_for('static', filename='img/eelu-logo.png') }}" alt="EELU Logo" class="img-fluid" style="max-width: 120px;">
+                        </div>
+                        <h2 class="h4 mb-1 fw-bold">Create Your Account</h2>
+                        <p class="text-muted">Join the EELU Appointment System</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-user text-primary"></i>
+                                    </span>
+                                    {{ form.first_name(class="form-control border-start-0" + (" is-invalid" if form.first_name.errors else ""), placeholder="Enter your first name", id="first_name") }}
+                                </div>
+                                {% for error in form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-user text-primary"></i>
+                                    </span>
+                                    {{ form.last_name(class="form-control border-start-0" + (" is-invalid" if form.last_name.errors else ""), placeholder="Enter your last name", id="last_name") }}
+                                </div>
+                                {% for error in form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-at text-primary"></i>
+                                </span>
+                                {{ form.username(class="form-control border-start-0" + (" is-invalid" if form.username.errors else ""), placeholder="Choose a username", id="username") }}
+                            </div>
+                            {% for error in form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-envelope text-primary"></i>
+                                </span>
+                                {{ form.email(class="form-control border-start-0" + (" is-invalid" if form.email.errors else ""), placeholder="Enter your email", id="email") }}
+                            </div>
+                            {% for error in form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="role" class="form-label">User Role</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-user-tag text-primary"></i>
+                                </span>
+                                {{ form.role(class="form-select border-start-0" + (" is-invalid" if form.role.errors else ""), id="role") }}
+                            </div>
+                            {% for error in form.role.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-lock text-primary"></i>
+                                    </span>
+                                    {{ form.password(class="form-control border-start-0" + (" is-invalid" if form.password.errors else ""), placeholder="Create a password", id="password") }}
+                                </div>
+                                {% for error in form.password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="confirm_password" class="form-label">Confirm Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-lock text-primary"></i>
+                                    </span>
+                                    {{ form.confirm_password(class="form-control border-start-0" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Confirm your password", id="confirm_password") }}
+                                </div>
+                                {% for error in form.confirm_password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.accept_terms(class="form-check-input" + (" is-invalid" if form.accept_terms.errors else ""), id="accept_terms") }}
+                            <label class="form-check-label" for="accept_terms">
+                                I agree to the <a href="#" class="text-decoration-none text-primary">Terms of Service</a> and <a href="#" class="text-decoration-none text-primary">Privacy Policy</a>
+                            </label>
+                            {% for error in form.accept_terms.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-grid mt-4">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-decoration-none text-primary fw-bold">Login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .logo-container {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .logo-container::after {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-mid));
+        filter: blur(15px);
+        opacity: 0.1;
+        z-index: -1;
+        border-radius: 50%;
+    }
+</style>
+{% endblock %} 

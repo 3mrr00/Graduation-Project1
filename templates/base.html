@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Appointment System{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-gradient-start: #1a2a6c;
+            --primary-gradient-mid: #b21f1f;
+            --primary-gradient-end: #fdbb2d;
+            --primary-color: #1a2a6c;
+            --secondary-color: #b21f1f;
+            --accent-color: #fdbb2d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --text-color: #333;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            --transition-speed: 0.4s;
+        }
+        
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .navbar {
+            background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-mid));
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            font-weight: 500;
+            position: relative;
+            margin: 0 0.5rem;
+            transition: all var(--transition-speed);
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent-color);
+            transition: width var(--transition-speed);
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .btn {
+            border-radius: 50px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-mid));
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-gradient-mid), var(--primary-gradient-start));
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e1e5ee;
+            box-shadow: none;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 4px rgba(26, 42, 108, 0.15);
+            border-color: var(--primary-color);
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        main {
+            flex: 1;
+        }
+        
+        .footer {
+            background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-mid));
+            color: rgba(255, 255, 255, 0.8);
+            padding: 4rem 0 1.5rem;
+            position: relative;
+            margin-top: 5rem;
+        }
+        
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(to bottom right, transparent 49%, var(--primary-gradient-start) 50%);
+        }
+        
+        .footer h5 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .footer h5:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 30px;
+            height: 2px;
+            background: var(--accent-color);
+        }
+        
+        .footer a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            color: var(--accent-color);
+            transform: translateX(5px);
+        }
+        
+        .footer-divider {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white !important;
+            transition: all 0.3s;
+        }
+        
+        .social-icon:hover {
+            background: var(--accent-color);
+            color: var(--primary-color) !important;
+            transform: translateY(-5px);
+        }
+        
+        .team-members li, .supervisors li, .contact-info li {
+            transition: all 0.3s;
+            padding: 4px 0;
+        }
+        
+        .team-members li:hover, .supervisors li:hover, .contact-info li:hover {
+            transform: translateX(5px);
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-mid));
+            padding: 6rem 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 6rem;
+            background: linear-gradient(to bottom right, transparent 49%, var(--light-color) 50%);
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-mid));
+        }
+        
+        /* Custom Animation Classes */
+        .animated-icon {
+            transition: all 0.5s;
+        }
+        
+        .animated-icon:hover {
+            transform: scale(1.2) rotate(5deg);
+            color: var(--secondary-color);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .hover-glow:hover {
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+        
+        /* Notification styles */
+        .notification-badge {
+            font-size: 0.6rem;
+            margin-left: -8px;
+            margin-top: -5px;
+        }
+        
+        .notification-dropdown {
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            padding: 0;
+        }
+        
+        .notification-dropdown .dropdown-item {
+            padding: 0.75rem 1rem;
+            white-space: normal;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .notification-dropdown .dropdown-item:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        .notification-dropdown .dropdown-header {
+            font-weight: 600;
+            color: var(--primary-color);
+            padding: 0.75rem 1rem;
+        }
+        
+        .notification-dropdown .dropdown-item p {
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .notification-dropdown .dropdown-item small {
+            font-size: 0.75rem;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="fas fa-calendar-check me-2 animated-icon"></i>Appointment System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_student() %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('student.dashboard') }}">Dashboard</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">
+                                        <span id="notificationCount">3</span>
+                                        <span class="visually-hidden">unread notifications</span>
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationsDropdown">
+                                    <li><h6 class="dropdown-header">Notifications</h6></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-calendar-check text-success me-2"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="mb-0">Your appointment with Dr. Ahmed has been confirmed</p>
+                                                <small class="text-muted">Today, 10:30 AM</small>
+                                            </div>
+                                        </div>
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-robot text-primary me-2"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="mb-0">AI Assistant has recommended 3 new time slots</p>
+                                                <small class="text-muted">Yesterday, 4:15 PM</small>
+                                            </div>
+                                        </div>
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-clock text-warning me-2"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="mb-0">Upcoming appointment reminder: Dr. Sarah, tomorrow at 2:00 PM</p>
+                                                <small class="text-muted">Yesterday, 9:00 AM</small>
+                                            </div>
+                                        </div>
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-center" href="#">View all notifications</a></li>
+                                </ul>
+                            </li>
+                        {% elif current_user.is_professor() %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('professor.dashboard') }}">Dashboard</a>
+                            </li>
+                        {% elif current_user.is_admin() %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" data-aos="fade-up" data-aos-delay="100">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <div class="footer-info">
+                        <h5 class="text-white mb-3">Appointment System</h5>
+                        <p class="mb-3">A professional appointment scheduling system for educational institutions.</p>
+                        <p class="mb-3"><small>A project report submitted in partial fulfillment of the requirements for B.Sc. degree in Software Engineering (2024/2025)</small></p>
+                        <div class="d-flex social-links">
+                            <a href="#" class="me-2 social-icon"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="me-2 social-icon"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="me-2 social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="me-2 social-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-white mb-3">Quick Links</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="{{ url_for('main.home') }}"><i class="fas fa-chevron-right me-2 animated-icon"></i>Home</a></li>
+                        <li class="mb-2"><a href="{{ url_for('main.about') }}"><i class="fas fa-chevron-right me-2 animated-icon"></i>About</a></li>
+                        <li class="mb-2"><a href="{{ url_for('main.contact') }}"><i class="fas fa-chevron-right me-2 animated-icon"></i>Contact</a></li>
+                        <li class="mb-2"><a href="{{ url_for('main.faq') }}"><i class="fas fa-chevron-right me-2 animated-icon"></i>FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-white mb-3">Team Members</h5>
+                    <ul class="list-unstyled team-members">
+                        <li class="mb-1">Amr Khaled – 21-00499</li>
+                        <li class="mb-1">Yomna Emad – 21-01703</li>
+                        <li class="mb-1">Mariam Hamas – 21-02081</li>
+                        <li class="mb-1">Ahmed Emad – 21-0837</li>
+                        <li class="mb-1">Ahmed Ismail – 21-00355</li>
+                        <li class="mb-1">Ashraf Sobhy – 21-00521</li>
+                        <li class="mb-1">Youssef Hassan – 21-01741</li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="text-white mb-3">Supervisors</h5>
+                    <ul class="list-unstyled supervisors">
+                        <li class="mb-2"><i class="fas fa-user-tie me-2"></i> PROF. DR. EMAN HOSNY</li>
+                        <li class="mb-2"><i class="fas fa-user-tie me-2"></i> ENG. Mohamed Kamal</li>
+                    </ul>
+                    
+                    <h5 class="text-white mt-4 mb-2">Contact</h5>
+                    <ul class="list-unstyled contact-info">
+                        <li class="mb-2"><i class="fas fa-envelope me-2 animated-icon"></i> support@appointmentsystem.com</li>
+                        <li class="mb-2"><i class="fas fa-phone me-2 animated-icon"></i> +20 123 456 789</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="my-4 footer-divider">
+            
+            <div class="text-center">
+                <p class="mb-0">&copy; 2024-2025 Appointment System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Notifications Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationCount = document.getElementById('notificationCount');
+            const notificationDropdown = document.querySelector('.notification-dropdown');
+            
+            if (notificationCount && notificationDropdown) {
+                // Handle notification clicks
+                notificationDropdown.addEventListener('click', function(e) {
+                    const item = e.target.closest('.dropdown-item');
+                    if (item && item.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        
+                        // Mark as read
+                        if (window.addNotification) {
+                            const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+                            notifications.forEach(notification => {
+                                notification.read = true;
+                            });
+                            localStorage.setItem('notifications', JSON.stringify(notifications));
+                            
+                            // Update badge
+                            if (window.updateNotificationBadge) {
+                                window.updateNotificationBadge();
+                            } else {
+                                notificationCount.textContent = '0';
+                                notificationCount.closest('.notification-badge').style.display = 'none';
+                            }
+                        }
+                    }
+                });
+                
+                // Initialize notification badge if the function exists
+                if (window.updateNotificationBadge) {
+                    window.updateNotificationBadge();
+                }
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

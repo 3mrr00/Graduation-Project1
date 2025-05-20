@@ -1,0 +1,578 @@
+{% extends "base.html" %}
+
+{% block title %}AI Appointment Assistant - Professor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">Professor</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.dashboard' }}" href="{{ url_for('professor.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.appointments' }}" href="{{ url_for('professor.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> Appointments
+                            {% if pending_appointments|default([])|length > 0 %}
+                            <span class="badge bg-primary rounded-pill ms-auto">{{ pending_appointments|default([])|length }}</span>
+                            {% endif %}
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.availabilities' }}" href="{{ url_for('professor.availabilities') }}">
+                            <i class="fas fa-clock me-2"></i> Availability
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.ai_assistant' }}" href="{{ url_for('professor.ai_assistant') }}">
+                            <i class="fas fa-robot me-2"></i> AI Assistant
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.profile' }}" href="{{ url_for('main.profile') }}">
+                            <i class="fas fa-user-cog me-2"></i> Profile Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- AI Assistant Hero -->
+            <section class="mb-5">
+                <div class="card border-0 shadow-lg overflow-hidden ai-hero-card">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-7">
+                                <h2 class="h3 mb-3 fw-bold">
+                                    <i class="fas fa-brain text-primary me-2"></i>
+                                    AI Scheduling Assistant
+                                </h2>
+                                <p class="lead mb-4">Your intelligent AI assistant analyzes student appointment patterns and helps optimize your availability schedule.</p>
+                                <div class="d-flex gap-2 mb-2">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="aiAssistToggle" checked>
+                                        <label class="form-check-label" for="aiAssistToggle">Enable AI assistance</label>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button id="updateRecommendationsBtn" class="btn btn-primary pulse">
+                                        <i class="fas fa-sync-alt me-2"></i>Update Insights
+                                    </button>
+                                    <button id="setPreferencesBtn" class="btn btn-primary d-flex align-items-center gap-2">
+                                        <i class="fas fa-cog"></i> Set Preferences
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-5 text-center">
+                                <div class="ai-robot-animation">
+                                    <i class="fas fa-robot fa-6x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Insights Section -->
+            <section class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-primary text-white p-3">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Smart Insights
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="border rounded p-3 h-100 recommendation-card">
+                                    <h4 class="h6 fw-bold mb-3">Popular Days</h4>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        {% for day in ai_insights.popular_days %}
+                                            <span class="badge bg-primary-subtle text-primary p-2">{{ day }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="text-muted small mb-0">Based on student appointment request patterns</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="border rounded p-3 h-100 recommendation-card">
+                                    <h4 class="h6 fw-bold mb-3">Popular Times</h4>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        {% for time in ai_insights.popular_times %}
+                                            <span class="badge bg-primary-subtle text-primary p-2">{{ time }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="text-muted small mb-0">Most requested appointment timeframes</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info p-3">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-info-circle fa-2x text-info me-3"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="alert-heading h6 mb-1">Optimization Enabled</h5>
+                                            <p class="mb-0 small">The AI system will automatically notify you of scheduling conflicts and help balance your appointment load throughout the week.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Analytics Section -->
+            <section class="mb-5">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-info text-white p-3">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Appointment Analytics
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h4 class="h6 mb-3">Appointment Distribution by Day</h4>
+                                <div class="chart-container" style="height: 200px;">
+                                    <canvas id="dayChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4 class="h6 mb-3">Appointment Distribution by Time</h4>
+                                <div class="chart-container" style="height: 200px;">
+                                    <canvas id="timeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <h4 class="h6 mb-3">AI Analysis</h4>
+                                    <p class="mb-0">
+                                        Based on {{ all_appointments|length }} appointments, your students prefer meeting on 
+                                        <strong>{% if appointment_days %}{{ ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][appointment_days.keys()|list|argmax] }}s{% else %}weekdays{% endif %}</strong> 
+                                        during 
+                                        <strong>{% if appointment_times %}{{ appointment_times.keys()|list|argmax|string + ':00'}}{% else %}business hours{% endif %}</strong>. 
+                                        The most common subject for appointments is <strong>{{ ai_insights.common_subjects[0] }}</strong>.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recommended Availability Section -->
+            <section>
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-success text-white p-3">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Recommended Availability
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="mb-4">Based on student request patterns, adding these time slots to your availability would meet the highest demand:</p>
+                        <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+                            {% for slot in recommended_availability %}
+                            <div class="col">
+                                <div class="card h-100 border-0 shadow recommendation-slot">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="card-title mb-0 h6">{{ slot.day }}</h5>
+                                            <span class="badge bg-primary">Recommended</span>
+                                        </div>
+                                        
+                                        <div class="recommended-times mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="far fa-clock me-1"></i>{{ slot.start_time }} - {{ slot.end_time }}
+                                                </span>
+                                                <small class="text-muted">{{ slot.reason }}</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-grid">
+                                            <a href="{{ url_for('professor.add_availability') }}" class="btn btn-sm btn-primary">
+                                                Add to Availability
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('professor.availabilities') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar me-2"></i>Manage All Availability
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="notificationToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-transparent text-white border-0">
+            <i class="fas fa-bell me-2"></i>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            <!-- Toast message will appear here -->
+        </div>
+    </div>
+</div>
+
+<!-- AI Preferences Modal -->
+<div class="modal fade" id="aiPreferencesModal" tabindex="-1" aria-labelledby="aiPreferencesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="aiPreferencesModalLabel">AI Assistant Preferences</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="preferencesForm">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Availability Preferences</label>
+                        <div class="mb-3">
+                            <label class="form-label">Maximum Appointments Per Day</label>
+                            <select class="form-select" id="maxAppointments">
+                                <option value="3">3 appointments</option>
+                                <option value="5" selected>5 appointments</option>
+                                <option value="8">8 appointments</option>
+                                <option value="10">10 appointments</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Buffer Time Between Appointments</label>
+                            <select class="form-select" id="bufferTime">
+                                <option value="0">No buffer</option>
+                                <option value="5">5 minutes</option>
+                                <option value="10" selected>10 minutes</option>
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Notification Preferences</label>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="emailNotificationsToggle" checked>
+                            <label class="form-check-label" for="emailNotificationsToggle">Email notifications</label>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="pushNotificationsToggle" checked>
+                            <label class="form-check-label" for="pushNotificationsToggle">Push notifications</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">AI Features</label>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="autoSuggestionsToggle" checked>
+                            <label class="form-check-label" for="autoSuggestionsToggle">Automatic availability suggestions</label>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="conflictDetectionToggle" checked>
+                            <label class="form-check-label" for="conflictDetectionToggle">Schedule conflict detection</label>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="studentPatternsToggle" checked>
+                            <label class="form-check-label" for="studentPatternsToggle">Student pattern analysis</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="savePreferencesBtn">Save Preferences</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    /* AI Hero Card */
+    .ai-hero-card {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Recommendation Cards */
+    .recommendation-card {
+        transition: all 0.3s;
+    }
+    
+    .recommendation-card:hover {
+        border-color: #0d6efd;
+        transform: translateY(-5px);
+    }
+    
+    /* Robot Animation */
+    .ai-robot-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+        100% {
+            transform: translateY(0px);
+        }
+    }
+    
+    /* Pulse effect for button */
+    .pulse {
+        position: relative;
+    }
+    
+    .pulse::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: inherit;
+        border-radius: inherit;
+        z-index: -1;
+        animation: pulse-animation 2s infinite;
+        opacity: 0.6;
+    }
+    
+    @keyframes pulse-animation {
+        0% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/ai-assistant.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Initialize modals
+        const preferencesModal = new bootstrap.Modal(document.getElementById('aiPreferencesModal'));
+        
+        // Initialize toast
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toast = new bootstrap.Toast(notificationToast, {
+            delay: 5000
+        });
+        
+        // Set up event listeners
+        document.getElementById('setPreferencesBtn').addEventListener('click', function() {
+            preferencesModal.show();
+        });
+        
+        document.getElementById('savePreferencesBtn').addEventListener('click', function() {
+            // Save preferences (would normally send to server)
+            preferencesModal.hide();
+            showToast('Preferences saved successfully!');
+        });
+        
+        document.getElementById('updateRecommendationsBtn').addEventListener('click', function() {
+            showToast('Insights updated successfully!');
+        });
+        
+        document.getElementById('aiAssistToggle').addEventListener('change', function() {
+            const enabled = this.checked;
+            toggleAIAssistance(enabled);
+        });
+        
+        // Setup charts
+        setupDayChart();
+        setupTimeChart();
+        
+        // Show initial notification
+        setTimeout(() => {
+            showToast('Welcome to your AI assistant! Check out your appointment insights.');
+        }, 1000);
+        
+        // Toggle AI assistance
+        function toggleAIAssistance(enabled) {
+            fetch('/professor/update_ai_preference', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ enabled: enabled })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(`AI assistance ${enabled ? 'enabled' : 'disabled'} successfully!`);
+                } else {
+                    showToast('Failed to update AI assistance preference', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred', 'danger');
+            });
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            // Set toast color
+            notificationToast.className = `toast bg-${type} text-white`;
+            
+            // Set message
+            toastMessage.textContent = message;
+            
+            // Show toast
+            toast.show();
+        }
+        
+        // Setup day chart
+        function setupDayChart() {
+            const ctx = document.getElementById('dayChart').getContext('2d');
+            
+            const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const dayData = [
+                {% for day, count in appointment_days.items() %}
+                    {{ count }},
+                {% endfor %}
+            ];
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dayLabels,
+                    datasets: [{
+                        label: 'Appointments',
+                        data: dayData,
+                        backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                        borderColor: 'rgba(13, 110, 253, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Setup time chart
+        function setupTimeChart() {
+            const ctx = document.getElementById('timeChart').getContext('2d');
+            
+            const timeLabels = [];
+            for (let hour = 9; hour < 18; hour++) {
+                timeLabels.push(`${hour}:00`);
+            }
+            
+            const timeData = [
+                {% for hour, count in appointment_times.items() %}
+                    {{ count }},
+                {% endfor %}
+            ];
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeLabels,
+                    datasets: [{
+                        label: 'Appointments',
+                        data: timeData,
+                        backgroundColor: 'rgba(25, 135, 84, 0.2)',
+                        borderColor: 'rgba(25, 135, 84, 1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

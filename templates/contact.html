@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - Appointment System{% endblock %}
+
+{% block content %}
+<div class="hero-section mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4">Get in Touch</h1>
+                <p class="lead mb-4">Have questions about our appointment system? We're here to help! Reach out to our team for support, feedback, or inquiries.</p>
+                <div class="d-flex gap-3">
+                    <a href="#contact-form" class="btn btn-light btn-lg">Send Message</a>
+                    <a href="{{ url_for('main.about') }}" class="btn btn-outline-light btn-lg">About Us</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{{ url_for('static', filename='img/eelu-logo.png') }}" alt="EELU Logo" class="img-fluid" style="max-width: 300px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row mb-5">
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 hover-glow">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-envelope fa-3x text-primary animated-icon"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Email Us</h3>
+                    <p class="mb-3">Our support team is always ready to help with any questions.</p>
+                    <a href="mailto:support@appointmentsystem.com" class="btn btn-outline-primary">support@appointmentsystem.com</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 hover-glow">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-phone-alt fa-3x text-primary animated-icon"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Call Us</h3>
+                    <p class="mb-3">Available Monday to Friday, 9am to 5pm.</p>
+                    <a href="tel:+201234567890" class="btn btn-outline-primary">+20 123 456 7890</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 hover-glow">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-map-marker-alt fa-3x text-primary animated-icon"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Visit Us</h3>
+                    <p class="mb-3">Egyptian E-Learning University (EELU), Cairo, Egypt.</p>
+                    <a href="https://maps.google.com/?q=EELU+Egypt" target="_blank" class="btn btn-outline-primary">View on Map</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-body p-5" id="contact-form">
+                    <h2 class="mb-4">Send Us a Message</h2>
+                    <form action="#" method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            <input type="text" class="form-control form-control-lg" id="name" name="name" placeholder="John Doe" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="john@example.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control form-control-lg" id="subject" name="subject" placeholder="How can we help you?">
+                        </div>
+                        <div class="mb-4">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control form-control-lg" id="message" name="message" rows="5" placeholder="Your message here..." required></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg pulse">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-body p-0">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.0598317669715!2d31.3418!3d30.0614!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14583e0fbc8fa619%3A0xf83bab10d9b8dc0!2sEgyptian%20E-Learning%20University%20(EELU)!5e0!3m2!1sen!2sus!4v1682511234567!5m2!1sen!2sus" 
+                            width="100%" height="100%" style="border:0; min-height: 450px;" allowfullscreen="" loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-light py-5 mb-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="lead mb-5">Find quick answers to our most common questions. If you still need help, don't hesitate to contact us.</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="accordion" id="faqAccordion">
+                    <!-- FAQ Item 1 -->
+                    <div class="accordion-item mb-3 border-0 shadow-sm">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                How do I book an appointment with a professor?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>To book an appointment, log in to your student account, navigate to the "Book Appointment" section, select your professor, choose an available date and time slot, provide a brief description of the purpose of your meeting, and submit your request. You'll receive a notification once the professor confirms your appointment.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 2 -->
+                    <div class="accordion-item mb-3 border-0 shadow-sm">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                How can I cancel or reschedule my appointment?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>To cancel an appointment, go to "My Appointments" in your dashboard, find the appointment you wish to cancel, and click the cancel button. For rescheduling, you'll need to cancel the existing appointment and book a new one at your preferred time.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 3 -->
+                    <div class="accordion-item mb-3 border-0 shadow-sm">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                What if I don't see any available time slots for my professor?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>If you don't see any available time slots, it means the professor has not set availability for the selected date or all slots are already booked. Try selecting a different date or contact the professor directly to arrange an appointment outside their regular office hours.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('main.faq') }}" class="btn btn-primary">View All FAQs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="section-title">Connect With Us</h2>
+            <p class="lead mb-5">Follow us on social media to stay updated with the latest news and updates.</p>
+            
+            <div class="d-flex justify-content-center gap-4">
+                <a href="#" class="social-icon-lg">
+                    <i class="fab fa-facebook-f fa-2x"></i>
+                </a>
+                <a href="#" class="social-icon-lg">
+                    <i class="fab fa-twitter fa-2x"></i>
+                </a>
+                <a href="#" class="social-icon-lg">
+                    <i class="fab fa-linkedin-in fa-2x"></i>
+                </a>
+                <a href="#" class="social-icon-lg">
+                    <i class="fab fa-github fa-2x"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .social-icon-lg {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-mid));
+        color: white !important;
+        transition: all 0.3s;
+    }
+    
+    .social-icon-lg:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: var(--primary-color);
+        font-weight: 600;
+        box-shadow: none;
+    }
+    
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: rgba(13, 110, 253, 0.25);
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Calendar Background -->
+    <rect x="40" y="40" width="120" height="140" rx="8" fill="#F8F9FA"/>
+    <rect x="40" y="60" width="120" height="120" rx="8" fill="white"/>
+    
+    <!-- Calendar Header -->
+    <rect x="40" y="40" width="120" height="20" rx="8" fill="#1a2a6c"/>
+    
+    <!-- Calendar Grid -->
+    <rect x="50" y="70" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="80" y="70" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="110" y="70" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="130" y="70" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    
+    <rect x="50" y="100" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="80" y="100" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="110" y="100" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="130" y="100" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    
+    <rect x="50" y="130" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="80" y="130" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="110" y="130" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    <rect x="130" y="130" width="20" height="20" rx="4" fill="#E9ECEF"/>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="160" r="5" fill="#1a2a6c"/>
+    <path d="M85 45 L115 45" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg> 

@@ -1,0 +1,602 @@
+{% extends "base.html" %}
+
+{% block title %}My Appointments - Professor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 gradient-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0 text-white">{{ current_user.get_full_name() }}</h5>
+                            <small class="text-white-50">Professor</small>
+                        </div>
+                    </div>
+                    <hr class="border-light">
+                    <nav class="nav flex-column">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.dashboard' }}" href="{{ url_for('professor.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.appointments' }}" href="{{ url_for('professor.appointments') }}">
+                            <i class="fas fa-calendar-check me-2"></i> Appointments
+                            {% if pending_appointments|length > 0 %}
+                            <span class="badge bg-primary rounded-pill ms-auto">{{ pending_appointments|length }}</span>
+                            {% endif %}
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.availabilities' }}" href="{{ url_for('professor.availabilities') }}">
+                            <i class="fas fa-clock me-2"></i> Availability
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'professor.ai_assistant' }}" href="{{ url_for('professor.ai_assistant') }}">
+                            <i class="fas fa-robot me-2"></i> AI Assistant
+                        </a>
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.profile' }}" href="{{ url_for('main.profile') }}">
+                            <i class="fas fa-user-cog me-2"></i> Profile Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg gradient-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="mb-1 text-white">Appointments Management</h4>
+                                    <p class="mb-0 text-white-50">View and manage all your appointments</p>
+                                </div>
+                                <div class="text-end">
+                                    <!-- Test Button for Debugging -->
+                                    <button onclick="testFunction()" class="btn btn-warning btn-sm rounded-pill me-2">
+                                        <i class="fas fa-bug me-2"></i>Test Buttons
+                                    </button>
+                                    <button class="btn btn-light btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#exportModal">
+                                        <i class="fas fa-download me-2"></i>Export Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date Range</label>
+                            <select class="form-select" id="dateFilter">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Search</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control border-0 bg-light" placeholder="Search appointments...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label d-none d-md-block">&nbsp;</label>
+                            <button class="btn btn-primary w-100" onclick="applyFilters()">
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Table -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Your Appointments</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Date & Time</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                                {{ appointment.student.first_name[0] }}{{ appointment.student.last_name[0] }}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ appointment.student.get_full_name() }}</h6>
+                                                <small class="text-muted">{{ appointment.student.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <h6 class="mb-0">{{ appointment.start_time.strftime('%B %d, %Y') }}</h6>
+                                            <small class="text-muted">{{ appointment.start_time.strftime('%I:%M %p') }} - {{ appointment.end_time.strftime('%I:%M %p') }}</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ appointment.subject }}</td>
+                                    <td>
+                                        {% if appointment.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif appointment.status == 'confirmed' %}
+                                            <span class="badge bg-info">Confirmed</span>
+                                        {% elif appointment.status == 'completed' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif appointment.status == 'cancelled' %}
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ appointment.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#appointmentDetails{{ appointment.id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            
+                                            {% if appointment.status == 'pending' %}
+                                            <button class="btn btn-sm btn-success" onclick="approveAppointment({{ appointment.id }})">
+                                                <i class="fas fa-check"></i> Accept
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="rejectAppointment({{ appointment.id }})">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                            {% endif %}
+                                            
+                                            {% if appointment.status == 'confirmed' %}
+                                            <button class="btn btn-sm btn-primary" onclick="completeAppointment({{ appointment.id }})">
+                                                <i class="fas fa-check-double"></i> Complete
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" onclick="rescheduleAppointment({{ appointment.id }})">
+                                                <i class="fas fa-calendar-alt"></i> Reschedule
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                
+                                {% if appointments|length == 0 %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <img src="{{ url_for('static', filename='img/empty-calendar.svg') }}" alt="No appointments" style="width: 120px; height: 120px;">
+                                            <h5 class="mt-3">No appointments found</h5>
+                                            <p class="text-muted">There are currently no appointments.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Details Modals -->
+{% for appointment in appointments %}
+<div class="modal fade" id="appointmentDetails{{ appointment.id }}" tabindex="-1" aria-labelledby="appointmentDetailsLabel{{ appointment.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="appointmentDetailsLabel{{ appointment.id }}">Appointment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-sm bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center">
+                            {{ appointment.student.first_name[0] }}{{ appointment.student.last_name[0] }}
+                        </div>
+                        <div>
+                            <h5 class="mb-1">{{ appointment.student.get_full_name() }}</h5>
+                            <p class="mb-0 text-muted">{{ appointment.student.email }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">Appointment Information</h6>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <p class="mb-1 text-muted">Date</p>
+                            <p class="mb-0 fw-medium">{{ appointment.start_time.strftime('%B %d, %Y') }}</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-1 text-muted">Time</p>
+                            <p class="mb-0 fw-medium">{{ appointment.start_time.strftime('%I:%M %p') }} - {{ appointment.end_time.strftime('%I:%M %p') }}</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-1 text-muted">Subject</p>
+                            <p class="mb-0 fw-medium">{{ appointment.subject }}</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-1 text-muted">Status</p>
+                            <span class="badge bg-{{ status_colors[appointment.status] }}-subtle text-{{ status_colors[appointment.status] }}">
+                                {{ appointment.status|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-3">Description</h6>
+                    <p class="mb-0">{{ appointment.description }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {% if appointment.status == 'pending' %}
+                <button type="button" class="btn btn-success" onclick="approveAppointment({{ appointment.id }})">Accept</button>
+                <button type="button" class="btn btn-danger" onclick="rejectAppointment({{ appointment.id }})">Reject</button>
+                {% endif %}
+                {% if appointment.status == 'confirmed' %}
+                <button type="button" class="btn btn-primary" onclick="completeAppointment({{ appointment.id }})">Mark as Completed</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Appointments</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Export Format</label>
+                    <select class="form-select" id="exportFormat">
+                        <option value="csv">CSV (.csv)</option>
+                        <option value="excel">Excel (.xlsx)</option>
+                        <option value="pdf">PDF (.pdf)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Date Range</label>
+                    <select class="form-select" id="exportDateRange">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Include Fields</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeStudentInfo" checked>
+                        <label class="form-check-label" for="includeStudentInfo">Student Information</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeDateTime" checked>
+                        <label class="form-check-label" for="includeDateTime">Date & Time</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeSubject" checked>
+                        <label class="form-check-label" for="includeSubject">Subject</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeStatus" checked>
+                        <label class="form-check-label" for="includeStatus">Status</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeDescription">
+                        <label class="form-check-label" for="includeDescription">Description</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="exportData()">Export</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="notificationToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-transparent text-white border-0">
+            <i class="fas fa-bell me-2"></i>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            <!-- Toast message will appear here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Gradient Cards */
+    .gradient-card {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+    }
+    
+    /* Navigation Links */
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        transition: all 0.3s;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Custom Table */
+    .custom-table {
+        margin: 0;
+    }
+    
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .custom-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Avatar */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+    
+    /* Status Colors */
+    .bg-pending-subtle {
+        background-color: rgba(255, 193, 7, 0.2);
+    }
+    
+    .bg-confirmed-subtle {
+        background-color: rgba(13, 110, 253, 0.2);
+    }
+    
+    .bg-completed-subtle {
+        background-color: rgba(25, 135, 84, 0.2);
+    }
+    
+    .bg-cancelled-subtle {
+        background-color: rgba(220, 53, 69, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/ai-assistant.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Initialize toast
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toast = new bootstrap.Toast(notificationToast, {
+            delay: 5000
+        });
+    });
+    
+    // Test function to debug appointment buttons
+    function testFunction() {
+        // Log to console to check if the function is called
+        console.log("Test function called");
+        
+        // Display the current status of all appointments
+        const appointments = document.querySelectorAll('tbody tr');
+        console.log(`Found ${appointments.length} appointments`);
+        
+        // Create a modal to display test options
+        const modalHTML = `
+        <div class="modal fade" id="testModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title">Test Options</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <h6 class="mb-2">Appointment Status Debug</h6>
+                            <div class="list-group">
+                                {% for appointment in appointments %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>{{ appointment.subject }}</strong>
+                                            <div class="small text-muted">
+                                                Current status: <span class="badge bg-{{ status_colors[appointment.status] }}">{{ appointment.status }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('professor.test_appointment_status', appointment_id=appointment.id, status='pending') }}" 
+                                               class="btn btn-sm btn-warning">Set Pending</a>
+                                            <a href="{{ url_for('professor.test_appointment_status', appointment_id=appointment.id, status='confirmed') }}" 
+                                               class="btn btn-sm btn-info">Set Confirmed</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>Use these options to change appointment status for testing.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        
+        // Add the modal to the page if it doesn't exist
+        if (!document.getElementById('testModal')) {
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        // Show the modal
+        const testModal = new bootstrap.Modal(document.getElementById('testModal'));
+        testModal.show();
+        
+        showToast('Test function executed. Debug modal opened.', 'info');
+    }
+    
+    function applyFilters() {
+        // Here you would implement the filtering logic
+        showToast('Filters applied successfully', 'success');
+    }
+    
+    function exportData() {
+        // Here you would implement the export functionality
+        showToast('Data exported successfully', 'success');
+    }
+    
+    function rescheduleAppointment(appointmentId) {
+        if (confirm('Are you sure you want to reschedule this meeting?')) {
+            // Here you would implement the rescheduling functionality
+            showToast('Meeting rescheduling initiated', 'info');
+        }
+    }
+    
+    function approveAppointment(appointmentId) {
+        if (confirm('Are you sure you want to accept this meeting?')) {
+            updateAppointmentStatus(appointmentId, 'confirmed');
+        }
+    }
+    
+    function rejectAppointment(appointmentId) {
+        if (confirm('Are you sure you want to reject this meeting?')) {
+            updateAppointmentStatus(appointmentId, 'cancelled');
+        }
+    }
+    
+    function completeAppointment(appointmentId) {
+        if (confirm('Are you sure you want to mark this meeting as completed?')) {
+            updateAppointmentStatus(appointmentId, 'completed');
+        }
+    }
+    
+    function updateAppointmentStatus(appointmentId, status) {
+        console.log(`Updating appointment ${appointmentId} to status: ${status}`);
+        
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        fetch(`/professor/update_appointment_status/${appointmentId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: `status=${encodeURIComponent(status)}`,
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast(`Appointment ${status} successfully!`, 'success');
+                // Reload the page after a short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast(data.message || 'An error occurred while updating the appointment status.', 'danger');
+                console.error('Error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred while updating the appointment status: ' + error.message, 'danger');
+        });
+    }
+    
+    function showToast(message, type = 'success') {
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        if (!notificationToast || !toastMessage) {
+            console.error('Toast elements not found');
+            return;
+        }
+        
+        // Set toast color based on type
+        notificationToast.className = `toast bg-${type} text-white`;
+        
+        // Set message
+        toastMessage.textContent = message;
+        
+        // Show toast
+        const toast = new bootstrap.Toast(notificationToast);
+        toast.show();
+    }
+</script>
+{% endblock %} 

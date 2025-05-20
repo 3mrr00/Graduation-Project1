@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="{{ g.get('lang_code', 'en') }}" {% if g.get('lang_code') == 'ar' %}dir="rtl"{% endif %}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}University Appointment System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    {% if g.get('lang_code') == 'ar' %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    {% else %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% endif %}
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Fullcalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="fas fa-calendar-check me-2"></i>
+                {{ _('University Appointment System') }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">{{ _('Home') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.about') }}">{{ _('About') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.contact') }}">{{ _('Contact') }}</a>
+                    </li>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_student() %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('student.dashboard') }}">{{ _('Dashboard') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('student.book_appointment') }}">{{ _('Book Appointment') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('student.appointments') }}">{{ _('My Appointments') }}</a>
+                            </li>
+                        {% elif current_user.is_professor() %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('professor.dashboard') }}">{{ _('Dashboard') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('professor.availabilities') }}">{{ _('My Availability') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('professor.appointments') }}">{{ _('Manage Appointments') }}</a>
+                            </li>
+                        {% elif current_user.is_admin() %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">{{ _('Admin Dashboard') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.users') }}">{{ _('Manage Users') }}</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.profile') }}">{{ _('Profile') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">{{ _('Login') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.register') }}">{{ _('Register') }}</a>
+                        </li>
+                    {% endif %}
+                    
+                    <!-- Language Selector Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if g.get('lang_code') == 'ar' %}
+                                <i class="fas fa-language"></i> العربية
+                            {% else %}
+                                <i class="fas fa-language"></i> English
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('main.set_language', language='en') }}">English</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.set_language', language='ar') }}">العربية</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="py-4">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>{{ _('University Appointment System') }}</h5>
+                    <p class="text-muted">{{ _('Simplifying scheduling between students and professors.') }}</p>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>{{ _('Quick Links') }}</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('main.index') }}" class="text-decoration-none text-muted">{{ _('Home') }}</a></li>
+                        <li><a href="{{ url_for('main.about') }}" class="text-decoration-none text-muted">{{ _('About') }}</a></li>
+                        <li><a href="{{ url_for('main.contact') }}" class="text-decoration-none text-muted">{{ _('Contact') }}</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>{{ _('Contact Us') }}</h5>
+                    <address class="text-muted">
+                        <i class="fas fa-map-marker-alt me-2"></i> {{ _('University Campus, Building 5') }}<br>
+                        <i class="fas fa-phone me-2"></i> {{ _('(123) 456-7890') }}<br>
+                        <i class="fas fa-envelope me-2"></i> {{ _('support@universityapps.edu') }}
+                    </address>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="mb-0 text-muted">{{ _('© 2023 University Appointment System. All rights reserved.') }}</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Fullcalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html> 
